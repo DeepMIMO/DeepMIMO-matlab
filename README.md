@@ -8,10 +8,10 @@ Machine learning tools are finding interesting applications in millimeter wave (
 # Code Package Content
 **To generate the dataset, please follow these steps:** 
 1. Download the 'DeepMIMO_Dataset_Generation_v1.1.zip' file and expand/uncompress it.
-2. Download the ray-tracing output files for the adopted scenario using [this link](https://drive.google.com/drive/folders/19fuUJeLdfkXGRwnIrwIRWA1NLz9NyZdy?usp=sharing).
-   - For the 'O1_60' scenario, download the folder named 'O1.zip'
-   - For the 'I1_2p5' scenario, download the folder named 'I1_Ly.zip'
-   - For the 'I1_2p4' scenario, download the folder named 'I1_Lx.zip'
+2. Download the ray-tracing output files for the adopted scenario.
+   - For the 'O1_60' scenario, download the folder named 'O1.zip' using [this link](https://drive.google.com/drive/folders/1ZqK-gF419RQx3Qec4OLgaykPfvV5oSUR?usp=sharing).
+   - For the 'I1_2p5' scenario, download the folder named 'I1_Ly.zip' using [this link](https://drive.google.com/drive/folders/19udT-QTdOdYbijJ0WkRijsRMUj9gLWe7?usp=sharing).
+   - For the 'I1_2p4' scenario, download the folder named 'I1_Lx.zip' using [this link](https://drive.google.com/drive/folders/162UxDO35OTXzetRQFiJqqe-zTfBZnKlM?usp=sharing).
 3. Add the folder of the ray-tracing scenario, for example the 'O1' folder, to the path 'DeepMIMO Dataset Generation/RayTracing Scenarios/'.
 4. Open the file 'DeepMIMO_Dataset_Generation.m' and adjust the DeepMIMO dataset parameters. (Note that these parameters are described in detail in Section III-B of the paper).
 5. From the MATLAB command window, call the function `DeepMIMO_dataset=DeepMIMO_Dataset_Generator()`. This function will generate the DeepMIMO dataset given the defined ray-tracing scenario and adopted parameters set.
