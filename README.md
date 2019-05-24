@@ -8,12 +8,12 @@ Machine learning tools are finding interesting applications in millimeter wave (
 # Code Package Content
 - **_Scenario name:_** 'O1'
 - **_To generate the dataset, please follow these steps:_**
-1. Download the 'DeepMIMO_Dataset_Generation_v1.1.zip' file and expand/uncompress it.
-2. Download the ray-tracing output files for the adopted scenario. (Note that the 'O1' ray-tracing scenario is described in detail in Section III-A of the paper).
-3. Add the folder of the ray-tracing scenario, for example the 'O1' folder, to the path 'DeepMIMO Dataset Generation/RayTracing Scenarios/'.
-4. Open the file 'DeepMIMO_Dataset_Generation.m' and adjust the DeepMIMO dataset parameters. (Note that these parameters are described in detail in Section III-B of the paper).
-5. From the MATLAB command window, call the function `DeepMIMO_dataset=DeepMIMO_Dataset_Generator()`. This function will generate the DeepMIMO dataset given the defined ray-tracing scenario and adopted parameters set.
-6. Given the generated DeepMIMO dataset, the channels and users' locations can be accessed as described in Section III-D of the paper.
+  1. Download the 'DeepMIMO_Dataset_Generation_v1.1.zip' file and expand/uncompress it.
+  2. Download the ray-tracing output files for the adopted scenario. (Note that the 'O1' ray-tracing scenario is described in detail in Section III-A of the paper).
+  3. Add the folder of the ray-tracing scenario, for example the 'O1' folder, to the path 'DeepMIMO Dataset Generation/RayTracing Scenarios/'.
+  4. Open the file 'DeepMIMO_Dataset_Generation.m' and adjust the DeepMIMO dataset parameters. (Note that these parameters are described in detail in Section III-B of the paper).
+  5. From the MATLAB command window, call the function `DeepMIMO_dataset=DeepMIMO_Dataset_Generator()`. This function will generate the DeepMIMO dataset given the defined ray-tracing scenario and adopted parameters set.
+  6. Given the generated DeepMIMO dataset, the channels and users' locations can be accessed as described in Section III-D of the paper.
 # License and Referencing
 This code package is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). If you in any way use this code for research that results in publications, please cite both the original article and the Remcom Wireless InSite website:
 > - A. Alkhateeb, “[DeepMIMO: A Generic Deep Learning Dataset for Millimeter Wave and Massive MIMO Applications](https://arxiv.org/pdf/1902.06435.pdf),” in Proc. of Information Theory and Applications Workshop (ITA), San Diego, CA, Feb. 2019.
