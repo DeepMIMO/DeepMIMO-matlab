@@ -9,7 +9,7 @@ Machine learning tools are finding interesting applications in millimeter wave (
 **_To generate the dataset, please follow these steps:_**
 1. Download the 'DeepMIMO_Dataset_Generation_v1.1.zip' file and expand/uncompress it.
 2. Download the ray-tracing output files for the adopted scenario.
-   - For the 'O1' scenario, download the files using [this link](https://drive.google.com/drive/folders/16okocQ9ALKjz3uqooSzYWNHXe1nDBdra?usp=sharing). (Note that the 'O1' ray-tracing scenario is described in detail in Section III-A of the paper).
+   - For the 'O1' scenario, download the files using [this link](https://drive.google.com/drive/folders/16okocQ9ALKjz3uqooSzYWNHXe1nDBdra?usp=sharing).
    - For the 'I1' scenario, download the files using.
 3. Add the folder of the ray-tracing scenario, for example the 'O1' folder, to the path 'DeepMIMO Dataset Generation/RayTracing Scenarios/'.
 4. Open the file 'DeepMIMO_Dataset_Generation.m' and adjust the DeepMIMO dataset parameters. (Note that these parameters are described in detail in Section III-B of the paper).
