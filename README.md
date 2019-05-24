@@ -1,5 +1,5 @@
 # DeepMIMO: A Generic Deep Learning Dataset for Millimeter Wave and Massive MIMO Applications
-This is a MATLAB code package of the **'O1' ray-tracing scenario** of the DeepMIMO dataset generated at **60GHz operating frequency** using [Remcom Wireless InSite](http://www.remcom.com/wireless-insite) software. The [DeepMIMO dataset](http://deepmimo.net/) is a publicly available parameterized dataset published for deep learning applications in mmWave and massive MIMO systems.
+This is a MATLAB code package of the DeepMIMO dataset generated using [Remcom Wireless InSite](http://www.remcom.com/wireless-insite) software. The [DeepMIMO dataset](http://deepmimo.net/) is a publicly available parameterized dataset published for deep learning applications in mmWave and massive MIMO systems.
 
 This MATLAB code package is related to the following article: 
 >Ahmed Alkhateeb, “[DeepMIMO: A Generic Deep Learning Dataset for Millimeter Wave and Massive MIMO Applications](https://arxiv.org/pdf/1902.06435.pdf),” in Proc. of Information Theory and Applications Workshop (ITA), San Diego, CA, Feb. 2019.
