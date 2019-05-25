@@ -9,6 +9,7 @@ Machine learning tools are finding interesting applications in millimeter wave (
 **To generate the dataset, please follow these steps:** 
 1. Download the 'DeepMIMO_Dataset_Generation_v1.1.zip' file and expand/uncompress it.
 2. Download the ray-tracing output file for the adopted scenario and expand/uncompress it.
+(Note that these ray-tracing scenarios are described in detail on [this website](http://deepmimo.net/ray_tracing.html))
    - For the 'O1_60' scenario, download the file named 'O1.zip' using [this link](https://drive.google.com/drive/folders/1ZqK-gF419RQx3Qec4OLgaykPfvV5oSUR?usp=sharing).
    - For the 'I1_2p5' scenario, download the file named 'I1_Ly.zip' using [this link](https://drive.google.com/drive/folders/19udT-QTdOdYbijJ0WkRijsRMUj9gLWe7?usp=sharing).
    - For the 'I1_2p4' scenario, download the file named 'I1_Lx.zip' using [this link](https://drive.google.com/drive/folders/162UxDO35OTXzetRQFiJqqe-zTfBZnKlM?usp=sharing).
