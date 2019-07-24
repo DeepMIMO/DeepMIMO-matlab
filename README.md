@@ -12,6 +12,7 @@ Machine learning tools are finding interesting applications in millimeter wave (
 (Note that these ray-tracing scenarios are described in detail on [this website](http://deepmimo.net/ray_tracing.html))
    - For the 'O1_60' scenario, download the file named 'O1_60.zip' using [this link](https://drive.google.com/drive/folders/1enHxTkokm60z2kvo91_MmZ26KNB_7ZIR?usp=sharing).
    - For the 'O1_28' scenario, download the file named 'O1_28.zip' using [this link](https://drive.google.com/drive/folders/1quUFyRN_kkgc7dQG3xwhKZlNcu8aefbe?usp=sharing).
+   - For the 'O1_3p5' scenario, download the file named 'O1_3p5.zip' using [this link](https://drive.google.com/drive/folders/1UjBMKTIDXWv1cU8pZXxiMbxp0kqxj_Dl?usp=sharing).
    - For the 'I1_2p5' scenario, download the file named 'I1_2p5.zip' using [this link](https://drive.google.com/drive/folders/11L8-MDipu7AbA0mKAGzOyShn_tdaHLjZ?usp=sharing).
    - For the 'I1_2p4' scenario, download the file named 'I1_2p4.zip' using [this link](https://drive.google.com/drive/folders/1rbIHfK__JUn5e52y5GWI7p-0cL5OSZUO?usp=sharing).
 3. Add the expanded folder of the ray-tracing scenario, for example the 'O1' folder, to the path 'DeepMIMO_Dataset_Generation/RayTracing Scenarios/'.
