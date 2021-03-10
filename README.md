@@ -20,6 +20,11 @@ Machine learning tools are finding interesting applications in millimeter wave (
 4. Open the file 'DeepMIMO_Dataset_Generation.m' and adjust the DeepMIMO dataset parameters. (Note that these parameters are described in detail in Section III-B of the paper).
 5. From the MATLAB command window, call the function `DeepMIMO_dataset=DeepMIMO_Dataset_Generator()`. This function will generate the DeepMIMO dataset given the defined ray-tracing scenario and adopted parameters set.
 6. Given the generated DeepMIMO dataset, the channels and users' locations can be accessed as described in Section III-D of the paper.
+
+Please check the following [demonstration video](https://user-images.githubusercontent.com/50970290/110688543-eadb7980-819e-11eb-92a0-eb3efc92f408.mp4) to help in reproducing the results.
+
+If you have any questions regarding the code and used dataset, please contact [Ahmed Alkhateeb](http://www.aalkhateeb.net/).
+
 # License and Referencing
 This code package is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). If you in any way use this code for research that results in publications, please cite both the original article and the Remcom Wireless InSite website:
 > - A. Alkhateeb, “[DeepMIMO: A Generic Deep Learning Dataset for Millimeter Wave and Massive MIMO Applications](https://arxiv.org/pdf/1902.06435.pdf),” in Proc. of Information Theory and Applications Workshop (ITA), San Diego, CA, Feb. 2019.
