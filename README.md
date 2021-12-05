@@ -9,7 +9,7 @@ Machine learning tools are finding interesting applications in millimeter wave (
 
 **To generate the dataset, please refer to [this website](https://deepmimo.net/versions/) for the different dataset options and their generation steps.
 
-If you have any questions regarding the code and used dataset, please contact [Ahmed Alkhateeb](http://www.aalkhateeb.net/).
+If you have any questions regarding the code and used dataset, please contact [Ahmed Alkhateeb](https://www.aalkhateeb.net/).
 
 # License and Referencing
 This code package is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/). If you in any way use this code for research that results in publications, please cite both the original article and the Remcom Wireless InSite website:
