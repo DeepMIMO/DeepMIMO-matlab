@@ -1,48 +1,40 @@
-% --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
-% Author: Ahmed Alkhateeb
-% Date: Sept. 5, 2018 
-% Goal: Encouraging research on ML/DL for mmWave/massive MIMO applications and
-% providing a benchmarking tool for the developed algorithms
-% ---------------------------------------------------------------------- %
+% ----------------- Add the path of DeepMIMO function --------------------%
+addpath('DeepMIMO_functions')
 
-function [DeepMIMO_dataset,params]=DeepMIMO_Dataset_Generator()
+% -------------------- DeepMIMO Dataset Generation -----------------------%
+% Load Dataset Parameters
+dataset_params = read_params('parameters.m');
+[DeepMIMO_dataset, dataset_params] = DeepMIMO_generator(dataset_params);
 
-% ------  Inputs to the DeepMIMO dataset generation code ------------ % 
-
-%------Ray-tracing scenario
-params.scenario='O1_60';                % The adopted ray tracing scenarios [check the available scenarios at www.aalkhateeb.net/DeepMIMO.html]
-
-%------DeepMIMO parameters set
-%Active base stations 
-params.active_BS=1;          % Includes the numbers of the active BSs (values from 1-18 for 'O1')
-
-% Active users
-params.active_user_first=1;       % The first row of the considered receivers section (check the scenario description for the receiver row map)
-params.active_user_last=1;        % The last row of the considered receivers section (check the scenario description for the receiver row map)
-
-% Number of BS Antenna 
-params.num_ant_x=1;                  % Number of the UPA antenna array on the x-axis 
-params.num_ant_y=8;                 % Number of the UPA antenna array on the y-axis 
-params.num_ant_z=4;                  % Number of the UPA antenna array on the z-axis
-                                     % Note: The axes of the antennas match the axes of the ray-tracing scenario
-                              
-% Antenna spacing
-params.ant_spacing=.5;               % ratio of the wavelnegth; for half wavelength enter .5        
-
-% System bandwidth
-params.bandwidth=0.5;                % The bandiwdth in GHz 
-
-% OFDM parameters
-params.num_OFDM=1024;                % Number of OFDM subcarriers
-params.OFDM_sampling_factor=1;   % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
-params.OFDM_limit=64;                % Only the first params.OFDM_limit subcarriers will be considered when constructing the channels
-
-% Number of paths
-params.num_paths=15;                  % Maximum number of paths to be considered (a value between 1 and 25), e.g., choose 1 if you are only interested in the strongest path
-
-params.saveDataset=0;
- 
-% -------------------------- DeepMIMO Dataset Generation -----------------%
-[DeepMIMO_dataset,params]=DeepMIMO_generator(params);
-
-end
+% -------------------------- Output Examples -----------------------------%
+% DeepMIMO_dataset{i}.user{j}.channel % Channel between BS i - User j
+% %  (# of User antennas) x (# of BS antennas) x (# of OFDM subcarriers)
+%
+% DeepMIMO_dataset{i}.user{j}.params % Parameters of the channel (paths)
+% DeepMIMO_dataset{i}.user{j}.LoS_status % Indicator of LoS path existence
+% %     | 1: LoS exists | 0: NLoS only | -1: No paths (Blockage)|
+%
+% DeepMIMO_dataset{i}.user{j}.loc % Location of User j
+% DeepMIMO_dataset{i}.loc % Location of BS i
+%
+% % BS-BS channels are generated only if (params.enable_BSchannels == 1):
+% DeepMIMO_dataset{i}.basestation{j}.channel % Channel between BS i - BS j
+% DeepMIMO_dataset{i}.basestation{j}.loc
+% DeepMIMO_dataset{i}.basestation{j}.LoS_status
+%
+% % Recall that the size of the channel vector was given by 
+% % (# of User antennas) x (# of BS antennas) x (# of OFDM subcarriers)
+% % Each of the first two channel matrix dimensions follows a certain 
+% % reshaping sequence that can be obtained by the following
+% % 'antennamap' vector: Each entry is 3 integers in the form of 
+% % 'xyz' where each representing the antenna number in x, y, z directions
+% antennamap = antenna_channel_map(params.num_ant_x, ...
+%                                     params.num_ant_y, params.num_ant_z, 1);
+%
+% -------------------------- Dynamic Scenario ----------------------------%
+%
+% DeepMIMO_dataset{f}{i}.user{j}.channel % Scene f - BS i - User j
+% % Every other command applies as before with the addition of scene ID
+% params{f} % Parameters of Scene f
+%
+% ------------------------------------------------------------------------%
