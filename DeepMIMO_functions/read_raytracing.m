@@ -4,9 +4,8 @@
 % Goal: Encouraging research on ML/DL for mmWave MIMO applications and
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
-function [channel_params,channel_params_BS,BS_loc]=read_raytracing(BS_ID, params)
+function [channel_params,channel_params_BS,BS_loc]=read_raytracing(BS_ID, params, scenario_files)
 %% Loading channel parameters between current active basesation transmitter and user receivers
-scenario_files = params.scenario_files;
 filename_DoD=strcat(scenario_files, '.', int2str(BS_ID),'.DoD.mat');
 filename_DoA=strcat(scenario_files, '.', int2str(BS_ID),'.DoA.mat');
 filename_CIR=strcat(scenario_files, '.', int2str(BS_ID),'.CIR.mat');
@@ -100,11 +99,12 @@ for Receiver_Number=1:user_last
     end
     pointer=double(pointer+max_paths*4+2);
 end
-channel_params=channel_params_all(1,:);
 
 if path_DS_violation>0
     cp_note(BS_ID,params.cp_duration,max_DS_violation,path_DS_violation,channel_pwr_lost,0)
 end
+
+channel_params=channel_params_all(1,:);
 
 %% Loading channel parameters between current active basesation transmitter and all the basestation receivers
 if params.enable_BS2BSchannels
@@ -163,7 +163,7 @@ if params.enable_BS2BSchannels
                 channel_params_all_BS(BS_count).pathloss=PL_BSBS_array(Receiver_BS_Number,2);
                 channel_params_all_BS(BS_count).LoS_status=LOS_BSBS_array(Receiver_BS_Number);
                 
-            %Cyclic prefix check for BS-BS links
+                %Cyclic prefix check for BS-BS links
                 max_DS_BS = double(max(channel_params_all_BS(BS_count).DS));
                 if  max_DS_BS>= params.cp_duration
                     if max_DS_BS > max_DS_violation_BS
@@ -194,15 +194,17 @@ if params.enable_BS2BSchannels
         end
         BS_pointer=double(BS_pointer+max_paths_BSBS*4+2);
     end
+    
+    if path_DS_violation_BS>0
+        cp_note(BS_ID,params.cp_duration,max_DS_violation_BS,path_DS_violation_BS,channel_pwr_lost_BS,1)
+    end
+    
 end
 channel_params_BS=channel_params_all_BS(1,:);
 
-if path_DS_violation>0
-    cp_note(BS_ID,params.cp_duration,max_DS_violation_BS,path_DS_violation_BS,channel_pwr_lost_BS,1)
-end
 
 %% Loading current active basestation location
-TX_Loc_array=importdata(strcat(params.scenario_files, '.TX_Loc.mat')); %Reading transmitter locations
+TX_Loc_array=importdata(strcat(scenario_files, '.TX_Loc.mat')); %Reading transmitter locations
 BS_loc = TX_Loc_array(BS_ID,2:4); %Select current active basestation location
 
 end
@@ -223,8 +225,5 @@ if basestation
 else
     disp([' This design choice negelects ' num2str(round(mean(channel_pwr_lost)*100,2)) '% of the channel power on average for ' num2str(path_DS_violation) ' BS-user links, with a maximum of ' num2str(round(max(channel_pwr_lost)*100,2)) '% of the channel power.'])
 end
-disp(' Please refer to "https://www.deepmimo.net/wp/community/" for the recommended practice.')
+disp(' Please refer to "https://www.deepmimo.net/community/" for the recommended practice.')
 end
-
-
-
