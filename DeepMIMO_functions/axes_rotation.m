@@ -1,3 +1,10 @@
+% --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
+% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Date: March 17, 2022
+% Goal: Encouraging research on ML/DL for MIMO applications and
+% providing a benchmarking tool for the developed algorithms
+% ---------------------------------------------------------------------- %
+
 function [DoD_theta_LCS, DoD_phi_LCS, DoA_theta_LCS, DoA_phi_LCS] = axes_rotation(TX_rot, DoD_theta_GCS, DoD_phi_GCS, RX_rot, DoA_theta_GCS, DoA_phi_GCS)
     %AXES ROTATION EFFECT on the DoDs and the DOAs
 

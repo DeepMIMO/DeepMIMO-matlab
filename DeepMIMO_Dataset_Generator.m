@@ -28,8 +28,9 @@ dataset_params = read_params('parameters.m');
 % % reshaping sequence that can be obtained by the following
 % % 'antennamap' vector: Each entry is 3 integers in the form of 
 % % 'xyz' where each representing the antenna number in x, y, z directions
-% antennamap = antenna_channel_map(params.num_ant_x, ...
-%                                     params.num_ant_y, params.num_ant_z, 1);
+% antennamap = antenna_channel_map(params.num_ant_BS(1), ...
+%                                  params.num_ant_BS(2), ...
+%                                  params.num_ant_BS(3), 1);
 %
 % -------------------------- Dynamic Scenario ----------------------------%
 %

@@ -1,10 +1,11 @@
 % --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
-% Author: Ahmed Alkhateeb
-% Date: Sept. 5, 2018
-% Goal: Encouraging research on ML/DL for mmWave MIMO applications and
+% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Date: March 17, 2022
+% Goal: Encouraging research on ML/DL for MIMO applications and
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
-function [DeepMIMO_dataset, params]=DeepMIMO_generator(params)
+
+function [DeepMIMO_dataset, params] = DeepMIMO_generator(params)
 
     % -------------------------- DeepMIMO Dataset Generation -----------------%
     fprintf(' DeepMIMO Dataset Generation started')
@@ -64,18 +65,17 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
 
         % BS transmitter location & rotation
         DeepMIMO_dataset{t}.loc = TX{t}.loc;
-        DeepMIMO_dataset{t}.rotation = params_inner.array_rotation(t,:);
+        DeepMIMO_dataset{t}.rotation = params_inner.array_rotation_BS(t,:);
 
         %----- BS-User Channels
         for user=1:params.num_user
             % Channel Construction
 
-            if params.activate_FD_channels
-                [DeepMIMO_dataset{t}.user{user}.channel]=construct_DeepMIMO_channel(params_inner.num_ant(t, :), params_inner.array_rotation(t,:), params_inner.ant_spacing(t), params.num_ant_UE, params_inner.array_rotation_UE(user, :), params.ant_spacing_UE, TX{t}.channel_params(user), params);
+            if params.generate_OFDM_channels
+                [DeepMIMO_dataset{t}.user{user}.channel]=construct_DeepMIMO_channel(params_inner.num_ant_BS(t, :), params_inner.array_rotation_BS(t,:), params_inner.ant_spacing_BS(t), params.num_ant_UE, params_inner.array_rotation_UE(user, :), params.ant_spacing_UE, TX{t}.channel_params(user), params);
             else
-                [DeepMIMO_dataset{t}.user{user}.channel]=construct_DeepMIMO_channel_TD(params_inner.num_ant(t, :), params_inner.array_rotation(t,:), params_inner.ant_spacing(t), params.num_ant_UE, params_inner.array_rotation_UE(user, :), params.ant_spacing_UE, TX{t}.channel_params(user), params);
+                [DeepMIMO_dataset{t}.user{user}.channel]=construct_DeepMIMO_channel_TD(params_inner.num_ant_BS(t, :), params_inner.array_rotation_BS(t,:), params_inner.ant_spacing_BS(t), params.num_ant_UE, params_inner.array_rotation_UE(user, :), params.ant_spacing_UE, TX{t}.channel_params(user), params);
                 DeepMIMO_dataset{t}.user{user}.ToA = TX{t}.channel_params(user).ToA; %Time of Arrival/Flight of each channel path (seconds)
-                DeepMIMO_dataset{t}.user{user}.DS = TX{t}.channel_params(user).DS; %Delay spread of each channel path (seconds)
             end
             DeepMIMO_dataset{t}.user{user}.rotation = params_inner.array_rotation_UE(user, :);
 
@@ -93,14 +93,13 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
         if params.enable_BS2BSchannels
             for BSreceiver=1:params.num_active_BS
                 % Channel Construction
-                if params.activate_FD_channels
-                    [DeepMIMO_dataset{t}.basestation{BSreceiver}.channel]=construct_DeepMIMO_channel(params_inner.num_ant(t, :), params_inner.array_rotation(t,:), params_inner.ant_spacing(t), params_inner.num_ant(BSreceiver, :), params_inner.array_rotation(BSreceiver,:), params_inner.ant_spacing(BSreceiver), TX{t}.channel_params_BSBS(BSreceiver), params);
+                if params.generate_OFDM_channels
+                    [DeepMIMO_dataset{t}.basestation{BSreceiver}.channel]=construct_DeepMIMO_channel(params_inner.num_ant_BS(t, :), params_inner.array_rotation_BS(t,:), params_inner.ant_spacing_BS(t), params_inner.num_ant_BS(BSreceiver, :), params_inner.array_rotation_BS(BSreceiver,:), params_inner.ant_spacing_BS(BSreceiver), TX{t}.channel_params_BSBS(BSreceiver), params);
                 else
-                    [DeepMIMO_dataset{t}.basestation{BSreceiver}.channel]=construct_DeepMIMO_channel_TD(params_inner.num_ant(t, :), params_inner.array_rotation(t,:), params_inner.ant_spacing(t), params_inner.num_ant(BSreceiver, :), params_inner.array_rotation(BSreceiver,:), params_inner.ant_spacing(BSreceiver), TX{t}.channel_params_BSBS(BSreceiver), params);
+                    [DeepMIMO_dataset{t}.basestation{BSreceiver}.channel]=construct_DeepMIMO_channel_TD(params_inner.num_ant_BS(t, :), params_inner.array_rotation_BS(t,:), params_inner.ant_spacing_BS(t), params_inner.num_ant_BS(BSreceiver, :), params_inner.array_rotation_BS(BSreceiver,:), params_inner.ant_spacing_BS(BSreceiver), TX{t}.channel_params_BSBS(BSreceiver), params);
                     DeepMIMO_dataset{t}.basestation{BSreceiver}.ToA=TX{t}.channel_params_BSBS(BSreceiver).ToA; %Time of Arrival/Flight of each channel path (seconds)
-                    DeepMIMO_dataset{t}.basestation{BSreceiver}.DS=TX{t}.channel_params_BSBS(BSreceiver).DS; %Delay spread of each channel path (seconds)
                 end
-                DeepMIMO_dataset{t}.basestation{BSreceiver}.rotation = params_inner.array_rotation(BSreceiver, :);
+                DeepMIMO_dataset{t}.basestation{BSreceiver}.rotation = params_inner.array_rotation_BS(BSreceiver, :);
 
                 % Location, LOS status, distance, pathloss, and channel path parameters
                 DeepMIMO_dataset{t}.basestation{BSreceiver}.loc=TX{t}.channel_params_BSBS(BSreceiver).loc;

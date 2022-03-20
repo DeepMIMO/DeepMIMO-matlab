@@ -1,3 +1,10 @@
+% --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
+% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Date: March 17, 2022
+% Goal: Encouraging research on ML/DL for MIMO applications and
+% providing a benchmarking tool for the developed algorithms
+% ---------------------------------------------------------------------- %
+
 function antenna_map = antenna_channel_map(x, y, z, string)
 
     Mx_Ind=0:1:x-1;

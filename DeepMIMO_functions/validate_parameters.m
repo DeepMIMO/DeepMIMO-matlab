@@ -1,5 +1,14 @@
+% --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
+% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Date: March 17, 2022
+% Goal: Encouraging research on ML/DL for MIMO applications and
+% providing a benchmarking tool for the developed algorithms
+% ---------------------------------------------------------------------- %
+
 function [params, params_inner] = validate_parameters(params)
 
+    [params] = compare_with_default_params(params);
+    
     [params, params_inner] = additional_params(params);
 
     params_inner = validate_OFDM_params(params, params_inner);
@@ -9,11 +18,13 @@ function [params, params_inner] = additional_params(params)
 
     % Add dataset path
     if ~isfield(params, 'dataset_folder')
-        params_inner.dataset_folder = fullfile('./Raytracing_scenarios/');
+        current_folder = mfilename('fullpath');
+        deepmimo_folder = fileparts(fileparts(current_folder));
+        params_inner.dataset_folder = fullfile(deepmimo_folder, '/Raytracing_scenarios/');
 
         % Create folders if not exists
-        folder_one = './Raytracing_scenarios/';
-        folder_two = './DeepMIMO_dataset/';
+        folder_one = fullfile(deepmimo_folder, '/Raytracing_scenarios/');
+        folder_two = fullfile(deepmimo_folder, '/DeepMIMO_dataset/');
         if ~exist(folder_one, 'dir')
             mkdir(folder_one);
         end
@@ -49,7 +60,7 @@ function [params, params_inner] = additional_params(params)
         params.BS_grids = BS_grids;
     end
 
-    params.cp_duration = floor(params.num_OFDM*params.cyclic_prefix_ratio)/(params.bandwidth*1e9);
+    params.symbol_duration = (params.num_OFDM) / (params.bandwidth*1e9);
     params.carrier_freq = carrier_freq; % in Hz
     params.transmit_power_raytracing = transmit_power; % in dBm
     params.user_grids = user_grids;
@@ -62,39 +73,66 @@ function [params, params_inner] = additional_params(params)
     [params.user_ids, params.num_user] = find_users(params);
 end
 
+% Check the validity of the given parameters
+% Add default parameters if they don't exist in the current file
+function [params] = compare_with_default_params(params)
+    default_params = read_params('default_parameters.m');
+    default_fields = fieldnames(default_params);
+    fields = fieldnames(params);
+    default_fields_exist = zeros(1, length(default_fields));
+    for i = 1:length(fields)
+        comp = strcmp(fields{i}, default_fields);
+        if sum(comp) == 1
+            default_fields_exist(comp) = 1;
+        else
+            if ~strcmp(fields{i}, "dataset_folder")
+                fprintf('\nThe parameter "%s" defined in the given parameters is not used by DeepMIMO', fields{i}) 
+            end
+        end
+    end
+    default_fields_exist = ~default_fields_exist;
+    default_nonexistent_fields = find(default_fields_exist);
+    for i = 1:length(default_nonexistent_fields)
+        field = default_fields{default_nonexistent_fields(i)};
+        value = getfield(default_params, field);
+        params = setfield(params, field, value);
+        % fprintf('\nAdding default parameter: %s - %s', field, num2str(value)) 
+    end
+end
+
 function [params_inner] = validate_OFDM_params(params, params_inner)
     % Check UE antenna size
     ant_size = size(params.num_ant_UE);
     assert(ant_size(2) == 3, 'The defined user antenna panel size must be 3 dimensional (in x-y-z)')
 
     % Check BS antenna size
-    ant_size = size(params.num_ant);
+    ant_size = size(params.num_ant_BS);
     assert(ant_size(2) == 3, 'The defined BS antenna panel size must be 3 dimensional (in x-y-z)')
     if ant_size(1) ~= params.num_active_BS
         if ant_size(1) == 1
-            params_inner.num_ant = repmat(params.num_ant, params.num_active_BS, 1);
+            params_inner.num_ant_BS = repmat(params.num_ant_BS, params.num_active_BS, 1);
         else
             error('The defined BS antenna panel size must be either 1x3 or Nx3 dimensional, where N is the number of active BSs.')
         end
     else
-        params_inner.num_ant = params.num_ant;
+        params_inner.num_ant_BS = params.num_ant_BS;
     end
 
     % Check BS and UE antenna array (panel) orientation
     if params.activate_array_rotation
-        array_rotation_size = size(params.array_rotation);
+        array_rotation_size = size(params.array_rotation_BS);
         assert(array_rotation_size(2) == 3, 'The defined BS antenna array rotation must be 3 dimensional (rotation angles around x-y-z axes)')
         if array_rotation_size(1) ~= params.num_active_BS
             if array_rotation_size(1) == 1
-                params_inner.array_rotation = repmat(params.array_rotation, params.num_active_BS, 1);
+                params_inner.array_rotation_BS = repmat(params.array_rotation_BS, params.num_active_BS, 1);
             else
                 error('The defined BS antenna array rotation size must be either 1x3 or Nx3 dimensional, where N is the number of active BSs.')
             end
         else
-            params_inner.array_rotation = params.array_rotation;
+            params_inner.array_rotation_BS = params.array_rotation_BS;
         end
     else
-        params_inner.array_rotation = zeros(params.num_active_BS,3);
+        params_inner.array_rotation_BS = zeros(params.num_active_BS,3);
     end
 
     % Check UE antenna array (panel) orientation
@@ -116,15 +154,15 @@ function [params_inner] = validate_OFDM_params(params, params_inner)
     
     
     % Check BS antenna spacing
-    ant_spacing_size = length(params.ant_spacing);
+    ant_spacing_size = length(params.ant_spacing_BS);
     if ant_spacing_size ~= params.num_active_BS
         if ant_spacing_size == 1
-            params_inner.ant_spacing = repmat(params.ant_spacing, params.num_active_BS, 1);
+            params_inner.ant_spacing_BS = repmat(params.ant_spacing_BS, params.num_active_BS, 1);
         else
             error('The defined BS antenna spacing must be either a scalar or an N dimensional vector, where N is the number of active BSs.')
         end
     else
-        params_inner.ant_spacing = params.ant_spacing;
+        params_inner.ant_spacing_BS = params.ant_spacing_BS;
     end
 
     

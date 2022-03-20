@@ -1,3 +1,10 @@
+% --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
+% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Date: March 17, 2022
+% Goal: Encouraging research on ML/DL for MIMO applications and
+% providing a benchmarking tool for the developed algorithms
+% ---------------------------------------------------------------------- %
+
 function [users_ids, num_user] = find_users(params)
 
     rng(5); % For reproducibility with the same parameters
@@ -28,13 +35,5 @@ function [users_ids, num_user] = find_users(params)
     end
     users_ids = sort(users_ids);
     num_user = length(users_ids);
-
-% % Calculate the user IDs to be read
-% num_rows=max(min(user_grids(:,2),params.active_user_last)-max(user_grids(:,1),params.active_user_first)+1,0);
-% num_user=sum(num_rows.*user_grids(:,3));  % total number of users
-% 
-% current_grid=min(find(max(params.active_user_first,user_grids(:,2))==user_grids(:,2)));
-% user_first=sum((max(min(params.active_user_first,user_grids(:,2))-user_grids(:,1)+1,0)).*user_grids(:,3))-user_grids(current_grid,3)+1;
-% user_last=user_first+num_user-1;
 
 end
