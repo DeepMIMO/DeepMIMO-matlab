@@ -10,7 +10,7 @@ DoD_array=importdata(filename_DoD);
 CIR_array=importdata(filename_CIR);
 Loc_array=importdata(filename_Loc);
 
-total_num_users=DoD_array(1);
+total_num_users=double(DoD_array(1));
 pointer=0; 
 
 DoD_array(1)=[];
@@ -19,8 +19,8 @@ CIR_array(1)=[];
 channel_params_all=struct('DoD_phi',[],'DoD_theta',[],'phase',[],'ToA',[],'power',[],'num_paths',[],'loc',[]);
 
 for Receiver_Number=1:total_num_users 
-    max_paths=DoD_array(pointer+2);
-    num_path_limited=min(num_paths,max_paths);
+    max_paths=double(DoD_array(pointer+2));
+    num_path_limited=double(min(double(num_paths),max_paths));
     if (max_paths>0)
         Relevant_data_length=max_paths*4;     
         Relevant_limited_data_length=num_path_limited*4;
@@ -44,9 +44,9 @@ for Receiver_Number=1:total_num_users
         channel_params_all(Receiver_Number).num_paths=0;
         channel_params_all(Receiver_Number).loc=Loc_array(Receiver_Number,2:4);
     end
-    pointer=pointer+max_paths*4+2;         
+    pointer=double(pointer+max_paths*4+2);         
 end 
 
-channel_params=channel_params_all(1,user_first:user_last);
+channel_params=channel_params_all(1,double(user_first):double(user_last));
 
 end

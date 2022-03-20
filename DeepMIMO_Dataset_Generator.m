@@ -10,15 +10,15 @@ function [DeepMIMO_dataset,params]=DeepMIMO_Dataset_Generator()
 % ------  Inputs to the DeepMIMO dataset generation code ------------ % 
 
 %------Ray-tracing scenario
-params.scenario='O1';                % The adopted ray tracing scenarios [check the available scenarios at www.aalkhateeb.net/DeepMIMO.html]
+params.scenario='O1_28';                % The adopted ray tracing scenarios [check the available scenarios at www.aalkhateeb.net/DeepMIMO.html]
 
 %------DeepMIMO parameters set
 %Active base stations 
-params.active_BS=[3,4,5,6];          % Includes the numbers of the active BSs (values from 1-18 for 'O1')
+params.active_BS=1;          % Includes the numbers of the active BSs (values from 1-18 for 'O1')
 
 % Active users
-params.active_user_first=1000;       % The first row of the considered receivers section (check the scenario description for the receiver row map)
-params.active_user_last=1300;        % The last row of the considered receivers section (check the scenario description for the receiver row map)
+params.active_user_first=4819;       % The first row of the considered receivers section (check the scenario description for the receiver row map)
+params.active_user_last=4820;        % The last row of the considered receivers section (check the scenario description for the receiver row map)
 
 % Number of BS Antenna 
 params.num_ant_x=1;                  % Number of the UPA antenna array on the x-axis 
@@ -40,7 +40,7 @@ params.OFDM_limit=64;                % Only the first params.OFDM_limit subcarri
 % Number of paths
 params.num_paths=5;                  % Maximum number of paths to be considered (a value between 1 and 25), e.g., choose 1 if you are only interested in the strongest path
 
-params.saveDataset=1;
+params.saveDataset=0;
  
 % -------------------------- DeepMIMO Dataset Generation -----------------%
 [DeepMIMO_dataset,params]=DeepMIMO_generator(params);
