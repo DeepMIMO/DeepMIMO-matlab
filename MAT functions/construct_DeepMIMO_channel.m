@@ -30,7 +30,8 @@ for l=1:1:params.num_paths
     gamma_comb=Mxx_Ind*gamma_x+Myy_Ind*gamma_y + Mzz_Ind*gamma_z;
     array_response=exp(gamma_comb);
     delay_normalized=params.ToA(l)/Ts;
-    channel=channel+array_response*sqrt(params.power(l)/ofdm_num_subcarriers)*exp(1j*params.phase(l)*ang_conv)*exp(-1j*2*pi*(k/ofdm_num_subcarriers)*delay_normalized);     
+    power = params.power(l).* antenna_pattern(params.DoD_theta(l), params.DoD_phi(l)) .* antenna_pattern(params.DoA_theta(l), params.DoA_phi(l)); % Apply the half-wave dipole radiation pattern for backward compatibility with the published papers
+    channel=channel+array_response*sqrt(power/ofdm_num_subcarriers)*exp(1j*params.phase(l)*ang_conv)*exp(-1j*2*pi*(k/ofdm_num_subcarriers)*delay_normalized);     
 end 
 
 end

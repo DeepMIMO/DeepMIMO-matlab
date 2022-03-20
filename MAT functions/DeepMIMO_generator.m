@@ -36,9 +36,10 @@ reverseStr = repmat(sprintf('\b'), 1, length(msg));
 for t=1:1:params.num_BS
     if sum(t == params.active_BS) ==1
         filename_DoD=strcat('./RayTracing Scenarios/',params.scenario,'/',params.scenario,'.',int2str(t),'.DoD.mat');
+        filename_DoA=strcat('./RayTracing Scenarios/',params.scenario,'/',params.scenario,'.',int2str(t),'.DoA.mat');
         filename_CIR=strcat('./RayTracing Scenarios/',params.scenario,'/',params.scenario,'.',int2str(t),'.CIR.mat');
         filename_Loc=strcat('./RayTracing Scenarios/',params.scenario,'/',params.scenario,'.Loc.mat');
-        [TX{t}.channel_params]=read_raytracing(filename_DoD,filename_CIR,filename_Loc,params.num_paths,user_first,user_last); 
+        [TX{t}.channel_params]=read_raytracing(filename_DoD,filename_DoA,filename_CIR,filename_Loc,params.num_paths,user_first,user_last); 
  
         count_done=count_done+1;
         percentDone = 100 * count_done / length(params.active_BS);
