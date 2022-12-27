@@ -26,7 +26,7 @@ function [users_ids, num_user] = find_users(params)
     num_of_subsampled_rows = round(length(rows)*params.row_subsampling);
     assert(num_of_subsampled_rows>=1, 'At least 1 row of users should be sampled! Please increase row subsampling rate.');
     
-    rows = rows(randperm(length(rows),num_of_subsampled_rows));
+    rows = sort(rows(randperm(length(rows),num_of_subsampled_rows)));
     prev_grids = rows > end_of_grids;
     id_from_prev_grids = sum(prev_grids .* users_per_grid, 1);
     curr_grids = rows >= start_of_grids & rows <= end_of_grids;
@@ -45,17 +45,13 @@ function [users_ids, num_user] = find_users(params)
     for i=1:length(row_select)
         if ~row_orientation(i) %Orientation flag = 0
             users_in_row = 1:1:row_select(i);
-            num_of_subsampled_users = round(length(users_in_row)*params.user_subsampling);
-            users_in_row = users_in_row(randperm(length(users_in_row), num_of_subsampled_users));
-            users_ids = [users_ids, users(i) + users_in_row];
         else %Orientation flag = 1
             users_in_row = ( step_select_1(i)*( (1:1:row_select(i)) -1) ) +1;
-            num_of_subsampled_users = round(length(users_in_row)*params.user_subsampling);
-            users_in_row = users_in_row(randperm(length(users_in_row), num_of_subsampled_users));
-            users_ids = [users_ids, users(i) + users_in_row];
         end
+        num_of_subsampled_users = round(length(users_in_row)*params.user_subsampling);
+        users_in_row = sort(users_in_row(randperm(length(users_in_row), num_of_subsampled_users)));
+        users_ids = [users_ids, users(i) + users_in_row];
     end
-    users_ids = sort(users_ids);
     num_user = length(users_ids);
 
 end
