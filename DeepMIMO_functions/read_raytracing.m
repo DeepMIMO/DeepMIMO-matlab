@@ -1,5 +1,5 @@
 % --------- DeepMIMO: A Generic Dataset for mmWave and massive MIMO ------%
-% Authors: Ahmed Alkhateeb, Umut Demirhan, Abdelrahman Taha 
+% Authors: Umut Demirhan, Abdelrahman Taha, Ahmed Alkhateeb
 % Date: March 17, 2022
 % Goal: Encouraging research on ML/DL for MIMO applications and
 % providing a benchmarking tool for the developed algorithms
@@ -41,6 +41,7 @@ channel_params_all_BS =struct('DoD_phi',[],'DoD_theta',[],'DoA_phi',[],'DoA_thet
 dc = duration_check(params.symbol_duration);
 
 user_count = 1;
+[~,user_order] = sort(user_ids);
 for Receiver_Number=1:user_last
     max_paths=double(DoD_array(pointer+2));
     num_path_limited=double(min(num_paths,max_paths));
@@ -53,34 +54,34 @@ for Receiver_Number=1:user_last
             Relevant_DoA_array=DoA_array(pointer+3:pointer+2+Relevant_data_length);
             Relevant_CIR_array=CIR_array(pointer+3:pointer+2+Relevant_data_length);
             
-            channel_params_all(user_count).DoD_phi=Relevant_DoD_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_count).DoD_theta=Relevant_DoD_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_count).DoA_phi=Relevant_DoA_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_count).DoA_theta=Relevant_DoA_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_count).phase=Relevant_CIR_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_count).ToA=Relevant_CIR_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_count).power=1e-3*(10.^(0.1*( Relevant_CIR_array(4:4:Relevant_limited_data_length)+(transmit_power-tx_power_raytracing) )));
-            channel_params_all(user_count).num_paths=num_path_limited;
-            channel_params_all(user_count).loc=Loc_array(Receiver_Number,2:4);
-            channel_params_all(user_count).distance=PL_array(Receiver_Number,1);
-            channel_params_all(user_count).pathloss=PL_array(Receiver_Number,2);
-            channel_params_all(user_count).LoS_status=LOS_array(Receiver_Number);
+            channel_params_all(user_order(user_count)).DoD_phi=Relevant_DoD_array(2:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).DoD_theta=Relevant_DoD_array(3:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).DoA_phi=Relevant_DoA_array(2:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).DoA_theta=Relevant_DoA_array(3:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).phase=Relevant_CIR_array(2:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).ToA=Relevant_CIR_array(3:4:Relevant_limited_data_length);
+            channel_params_all(user_order(user_count)).power=1e-3*(10.^(0.1*( Relevant_CIR_array(4:4:Relevant_limited_data_length)+(transmit_power-tx_power_raytracing) )));
+            channel_params_all(user_order(user_count)).num_paths=num_path_limited;
+            channel_params_all(user_order(user_count)).loc=Loc_array(Receiver_Number,2:4);
+            channel_params_all(user_order(user_count)).distance=PL_array(Receiver_Number,1);
+            channel_params_all(user_order(user_count)).pathloss=PL_array(Receiver_Number,2);
+            channel_params_all(user_order(user_count)).LoS_status=LOS_array(Receiver_Number);
             
-            dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
+            dc.add_ToA(channel_params_all(user_order(user_count)).power, channel_params_all(user_order(user_count)).ToA);
             
         else
-            channel_params_all(user_count).DoD_phi=[];
-            channel_params_all(user_count).DoD_theta=[];
-            channel_params_all(user_count).DoA_phi=[];
-            channel_params_all(user_count).DoA_theta=[];
-            channel_params_all(user_count).phase=[];
-            channel_params_all(user_count).ToA=[];
-            channel_params_all(user_count).power=[];
-            channel_params_all(user_count).num_paths=0;
-            channel_params_all(user_count).loc=Loc_array(Receiver_Number,2:4);
-            channel_params_all(user_count).distance=PL_array(Receiver_Number,1);
-            channel_params_all(user_count).pathloss=[];
-            channel_params_all(user_count).LoS_status=LOS_array(Receiver_Number);
+            channel_params_all(user_order(user_count)).DoD_phi=[];
+            channel_params_all(user_order(user_count)).DoD_theta=[];
+            channel_params_all(user_order(user_count)).DoA_phi=[];
+            channel_params_all(user_order(user_count)).DoA_theta=[];
+            channel_params_all(user_order(user_count)).phase=[];
+            channel_params_all(user_order(user_count)).ToA=[];
+            channel_params_all(user_order(user_count)).power=[];
+            channel_params_all(user_order(user_count)).num_paths=0;
+            channel_params_all(user_order(user_count)).loc=Loc_array(Receiver_Number,2:4);
+            channel_params_all(user_order(user_count)).distance=PL_array(Receiver_Number,1);
+            channel_params_all(user_order(user_count)).pathloss=[];
+            channel_params_all(user_order(user_count)).LoS_status=LOS_array(Receiver_Number);
         end
         user_count = double(user_count + 1);
     end
