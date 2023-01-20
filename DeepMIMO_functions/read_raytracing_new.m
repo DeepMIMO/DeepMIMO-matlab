@@ -5,176 +5,162 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params,channel_params_BS,BS_loc]=read_raytracing_new(BS_ID, params, scenario_files)
+function [channel_params_user, channel_params_BS, BS_loc]=read_raytracing_new(BS_ID, params, scenario_files, comm)
 %% Loading channel parameters between current active basesation transmitter and user receivers
-filename_DoD=strcat(scenario_files, '.', int2str(BS_ID),'.DoD.mat');
-filename_DoA=strcat(scenario_files, '.', int2str(BS_ID),'.DoA.mat');
-filename_CIR=strcat(scenario_files, '.', int2str(BS_ID),'.CIR.mat');
-filename_LOS=strcat(scenario_files, '.', int2str(BS_ID),'.LoS.mat');
-filename_PL=strcat(scenario_files, '.', int2str(BS_ID),'.PL.mat');
-filename_Loc=strcat(scenario_files, '.Loc.mat');
 
-DoD_array=importdata(filename_DoD);
-DoA_array=importdata(filename_DoA);
-CIR_array=importdata(filename_CIR);
-LOS_array=importdata(filename_LOS);
-PL_array=importdata(filename_PL);
-Loc_array=importdata(filename_Loc);
+% Load the scenario files
+BS_ID_map = params.BS_ID_map;
+%%% user_ID_map = params.user_ID_map;
 
-user_ids = double(params.user_ids);
-user_last = double(max(user_ids));
+filename_BSBS_all = strcat(scenario_files,'_TX', int2str(BS_ID_map(BS_ID,2)),'.mat'); %%%%&&&&%%%%
+channels = importdata(filename_BSBS_all);
+%%% total_num_BSs = size(BS_ID_map,1);
 num_paths = double(params.num_paths);
-tx_power_raytracing = double(params.transmit_power_raytracing); %The transmit power in dBm used to generate the channel data
-transmit_power = 30;
+tx_power_raytracing = params.transmit_power_raytracing;  % Current TX power in dBm
+transmit_power = 30; % Target TX power in dBm (1 Watt transmit power)
 
-total_num_users=double(DoD_array(1));
-pointer=0;
-
-DoD_array(1)=[];
-DoA_array(1)=[];
-CIR_array(1)=[];
-LOS_array(1)=[];
-
-channel_params_all=struct('DoD_phi',[],'DoD_theta',[],'DoA_phi',[],'DoA_theta',[],'phase',[],'ToA',[],'power',[],'num_paths',[],'loc',[],'LoS_status',[]);
+channel_params_all =struct('DoD_phi',[],'DoD_theta',[],'DoA_phi',[],'DoA_theta',[],'phase',[],'ToA',[],'power',[],'num_paths',[],'loc',[],'LoS_status',[]);
 channel_params_all_BS =struct('DoD_phi',[],'DoD_theta',[],'DoA_phi',[],'DoA_theta',[],'phase',[],'ToA',[],'power',[],'num_paths',[],'loc',[],'LoS_status',[]);
+if comm
+    dc = duration_check(params.symbol_duration);
+end
+% Current active TX BS location
+BS_loc = channels{1}.tx_loc;
 
-dc = duration_check(params.symbol_duration);
+% active user indices
+all_BS_RX_indices=zeros(1,size(BS_ID_map,1));
+BS_RX_ID = BS_ID_map(:,1);
+channels_ID = 1:1:numel(channels);
+for bb = 1:1:numel(BS_RX_ID)
+    current_ID_vector = [BS_ID_map(BS_ID,2) BS_ID_map(BS_RX_ID(bb),2) BS_ID_map(BS_ID,3) BS_ID_map(BS_RX_ID(bb),3)];
+    for cc= channels_ID
+        Temp = double([channels{cc}.TX_ID,channels{cc}.RX_ID,channels{cc}.TX_ID_s,channels{cc}.RX_ID_s]);
+        if ~sum(Temp - current_ID_vector)
+            all_BS_RX_indices(bb) = cc;
+        end
+    end
+end
 
-user_count = 1;
-[~,user_order] = sort(user_ids);
-for Receiver_Number=1:user_last
-    max_paths=double(DoD_array(pointer+2));
-    num_path_limited=double(min(num_paths,max_paths));
-    if ismember(Receiver_Number, user_ids)
+if comm
+    active_user_RX_indices = setdiff(channels_ID,all_BS_RX_indices);
+
+    user_count = 1;
+    for Receiver_user_index= active_user_RX_indices
+        max_paths = double(numel(channels{Receiver_user_index}.paths.phase));
+        num_path_limited=double(min(num_paths,max_paths));
+
         if (max_paths>0)
-            Relevant_data_length=max_paths*4;
-            Relevant_limited_data_length=num_path_limited*4;
-            
-            Relevant_DoD_array=DoD_array(pointer+3:pointer+2+Relevant_data_length);
-            Relevant_DoA_array=DoA_array(pointer+3:pointer+2+Relevant_data_length);
-            Relevant_CIR_array=CIR_array(pointer+3:pointer+2+Relevant_data_length);
-            
-            channel_params_all(user_order(user_count)).DoD_phi=Relevant_DoD_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).DoD_theta=Relevant_DoD_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).DoA_phi=Relevant_DoA_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).DoA_theta=Relevant_DoA_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).phase=Relevant_CIR_array(2:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).ToA=Relevant_CIR_array(3:4:Relevant_limited_data_length);
-            channel_params_all(user_order(user_count)).power=1e-3*(10.^(0.1*( Relevant_CIR_array(4:4:Relevant_limited_data_length)+(transmit_power-tx_power_raytracing) )));
-            channel_params_all(user_order(user_count)).num_paths=num_path_limited;
-            channel_params_all(user_order(user_count)).loc=Loc_array(Receiver_Number,2:4);
-            channel_params_all(user_order(user_count)).distance=PL_array(Receiver_Number,1);
-            channel_params_all(user_order(user_count)).pathloss=PL_array(Receiver_Number,2);
-            channel_params_all(user_order(user_count)).LoS_status=LOS_array(Receiver_Number);
-            
-            dc.add_ToA(channel_params_all(user_order(user_count)).power, channel_params_all(user_order(user_count)).ToA);
-            
+            channel_params = channels{Receiver_user_index}.paths;
+            channel_params_all(user_count).DoD_phi=channel_params.DoD_phi(1:num_path_limited);
+            channel_params_all(user_count).DoD_theta=channel_params.DoD_theta(1:num_path_limited);
+            channel_params_all(user_count).DoA_phi=channel_params.DoA_phi(1:num_path_limited);
+            channel_params_all(user_count).DoA_theta=channel_params.DoA_theta(1:num_path_limited);
+            channel_params_all(user_count).phase=channel_params.phase(1:num_path_limited);
+            channel_params_all(user_count).ToA=channel_params.ToA(1:num_path_limited);
+            channel_params_all(user_count).power=1e-3*(10.^(0.1*(channel_params.power(1:num_path_limited) +(transmit_power-tx_power_raytracing))));
+            channel_params_all(user_count).Doppler_vel=channel_params.Doppler_vel(1:num_path_limited);
+            channel_params_all(user_count).Doppler_acc=channel_params.Doppler_acc(1:num_path_limited);
+            channel_params_all(user_count).num_paths=num_path_limited;
+            channel_params_all(user_count).loc=channels{Receiver_user_index}.rx_loc;
+            channel_params_all(user_count).distance=channels{Receiver_user_index}.dist;
+            channel_params_all(user_count).pathloss=channels{Receiver_user_index}.PL;
+            channel_params_all(user_count).LoS_status=channels{Receiver_user_index}.LOS_status;
+
+            if comm
+                dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
+            end
+
         else
-            channel_params_all(user_order(user_count)).DoD_phi=[];
-            channel_params_all(user_order(user_count)).DoD_theta=[];
-            channel_params_all(user_order(user_count)).DoA_phi=[];
-            channel_params_all(user_order(user_count)).DoA_theta=[];
-            channel_params_all(user_order(user_count)).phase=[];
-            channel_params_all(user_order(user_count)).ToA=[];
-            channel_params_all(user_order(user_count)).power=[];
-            channel_params_all(user_order(user_count)).num_paths=0;
-            channel_params_all(user_order(user_count)).loc=Loc_array(Receiver_Number,2:4);
-            channel_params_all(user_order(user_count)).distance=PL_array(Receiver_Number,1);
-            channel_params_all(user_order(user_count)).pathloss=[];
-            channel_params_all(user_order(user_count)).LoS_status=LOS_array(Receiver_Number);
+            channel_params_all(user_count).DoD_phi=[];
+            channel_params_all(user_count).DoD_theta=[];
+            channel_params_all(user_count).DoA_phi=[];
+            channel_params_all(user_count).DoA_theta=[];
+            channel_params_all(user_count).phase=[];
+            channel_params_all(user_count).ToA=[];
+            channel_params_all(user_count).power=[];
+            channel_params_all(user_count).Doppler_vel=[];
+            channel_params_all(user_count).Doppler_acc=[];
+            channel_params_all(user_count).num_paths=0;
+            channel_params_all(user_count).loc=channels{Receiver_user_index}.rx_loc;
+            channel_params_all(user_count).distance=channels{Receiver_user_index}.dist;
+            channel_params_all(user_count).pathloss=[];
+            channel_params_all(user_count).LoS_status=channels{Receiver_user_index}.LOS_status;
         end
         user_count = double(user_count + 1);
     end
-    pointer=double(pointer+max_paths*4+2);
+
+    if ~isempty(active_user_RX_indices)
+        channel_params_user=channel_params_all(1,:);
+    else 
+        channel_params_user=struct([]);
+    end
+else
+    channel_params_user=struct([]);
 end
-
-dc.print_warnings('user', BS_ID);    
-dc.reset();
-
-channel_params=channel_params_all(1,:);
-
-%% Loading channel parameters between current active basesation transmitter and all the basestation receivers
-if params.enable_BS2BSchannels
-    filename_BSBS_DoD=strcat(scenario_files, '.', int2str(BS_ID),'.DoD.BSBS.mat');
-    filename_BSBS_DoA=strcat(scenario_files, '.', int2str(BS_ID),'.DoA.BSBS.mat');
-    filename_BSBS_CIR=strcat(scenario_files, '.', int2str(BS_ID),'.CIR.BSBS.mat');
-    filename_BSBS_LOS=strcat(scenario_files, '.', int2str(BS_ID),'.LoS.BSBS.mat');
-    filename_BSBS_PL=strcat(scenario_files, '.', int2str(BS_ID),'.PL.BSBS.mat');
-    filename_BSBS_Loc=strcat(scenario_files, '.BSBS.RX_Loc.mat');
+%% Loading channel parameters between current active basesation transmitter and all the active basestation receivers
+if ~comm || params.enable_BS2BSchannels
     
-    DoD_BSBS_array=importdata(filename_BSBS_DoD);
-    DoA_BSBS_array=importdata(filename_BSBS_DoA);
-    CIR_BSBS_array=importdata(filename_BSBS_CIR);
-    LOS_BSBS_array=importdata(filename_BSBS_LOS);
-    PL_BSBS_array=importdata(filename_BSBS_PL);
-    Loc_BSBS_array=importdata(filename_BSBS_Loc);
-    
-    num_paths_BSBS = double(params.num_paths);
-    total_num_BSs=double(DoD_BSBS_array(1));
-    BS_pointer=0;
-    
-    DoD_BSBS_array(1)=[];
-    DoA_BSBS_array(1)=[];
-    CIR_BSBS_array(1)=[];
-    LOS_BSBS_array(1)=[];
-        
-    BS_count = 1;
-    for Receiver_BS_Number=1:total_num_BSs
-        max_paths_BSBS=double(DoD_BSBS_array(BS_pointer+2));
-        num_path_BS_limited=double(min(num_paths_BSBS,max_paths_BSBS));
-        if sum(Receiver_BS_Number == double(params.active_BS)) == 1 %Only read the channels related to the active basestation receivers
-            
-            if (max_paths_BSBS>0)
-                Relevant_data_length_BSBS=max_paths_BSBS*4;
-                Relevant_limited_data_length_BSBS=num_path_BS_limited*4;
-                
-                Relevant_DoD_BSBS_array=DoD_BSBS_array(BS_pointer+3:BS_pointer+2+Relevant_data_length_BSBS);
-                Relevant_DoA_BSBS_array=DoA_BSBS_array(BS_pointer+3:BS_pointer+2+Relevant_data_length_BSBS);
-                Relevant_CIR_BSBS_array=CIR_BSBS_array(BS_pointer+3:BS_pointer+2+Relevant_data_length_BSBS);
-                
-                channel_params_all_BS(BS_count).DoD_phi=Relevant_DoD_BSBS_array(2:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).DoD_theta=Relevant_DoD_BSBS_array(3:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).DoA_phi=Relevant_DoA_BSBS_array(2:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).DoA_theta=Relevant_DoA_BSBS_array(3:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).phase=Relevant_CIR_BSBS_array(2:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).ToA=Relevant_CIR_BSBS_array(3:4:Relevant_limited_data_length_BSBS);
-                channel_params_all_BS(BS_count).power=1e-3*(10.^(0.1*( Relevant_CIR_BSBS_array(4:4:Relevant_limited_data_length_BSBS)+(transmit_power-tx_power_raytracing) )));
-                channel_params_all_BS(BS_count).num_paths=num_path_BS_limited;
-                channel_params_all_BS(BS_count).loc=Loc_BSBS_array(Receiver_BS_Number,2:4);
-                channel_params_all_BS(BS_count).distance=PL_BSBS_array(Receiver_BS_Number,1);
-                channel_params_all_BS(BS_count).pathloss=PL_BSBS_array(Receiver_BS_Number,2);
-                channel_params_all_BS(BS_count).LoS_status=LOS_BSBS_array(Receiver_BS_Number);
-                
-                dc.add_ToA(channel_params_all_BS(BS_count).power, channel_params_all_BS(BS_count).ToA);
-                
-            else
-                channel_params_all_BS(BS_count).DoD_phi=[];
-                channel_params_all_BS(BS_count).DoD_theta=[];
-                channel_params_all_BS(BS_count).DoA_phi=[];
-                channel_params_all_BS(BS_count).DoA_theta=[];
-                channel_params_all_BS(BS_count).phase=[];
-                channel_params_all_BS(BS_count).ToA=[];
-                channel_params_all_BS(BS_count).power=[];
-                channel_params_all_BS(BS_count).num_paths=0;
-                channel_params_all_BS(BS_count).loc=Loc_BSBS_array(Receiver_BS_Number,2:4);
-                channel_params_all_BS(BS_count).distance=PL_BSBS_array(Receiver_BS_Number,1);
-                channel_params_all_BS(BS_count).pathloss=[];
-                channel_params_all_BS(BS_count).LoS_status=LOS_BSBS_array(Receiver_BS_Number);
+    active_BS_RX_indices=zeros(1,numel(params.active_BS));
+    BS_RX_ID = params.active_BS;
+    for bb = 1:1:numel(BS_RX_ID)
+        current_ID_vector = [BS_ID_map(BS_ID,2) BS_ID_map(BS_RX_ID(bb),2) BS_ID_map(BS_ID,3) BS_ID_map(BS_RX_ID(bb),3)];
+        for cc= channels_ID
+            Temp = double([channels{cc}.TX_ID,channels{cc}.RX_ID,channels{cc}.TX_ID_s,channels{cc}.RX_ID_s]);
+            if ~sum(Temp - current_ID_vector)
+                active_BS_RX_indices(bb) = cc;
             end
-            BS_count = double(BS_count + 1);
         end
-        BS_pointer=double(BS_pointer+max_paths_BSBS*4+2);
     end
     
-    dc.print_warnings('BS', BS_ID);
-    dc.reset()
-    
+    BS_count = 1;
+    for Receiver_BS_index= active_BS_RX_indices
+        max_paths = double(numel(channels{Receiver_BS_index}.paths.phase));
+        num_path_limited=double(min(num_paths,max_paths));
+        
+        if (max_paths>0)
+            channel_params = channels{Receiver_BS_index}.paths;
+            channel_params_all_BS(BS_count).DoD_phi=channel_params.DoD_phi(1:num_path_limited);
+            channel_params_all_BS(BS_count).DoD_theta=channel_params.DoD_theta(1:num_path_limited);
+            channel_params_all_BS(BS_count).DoA_phi=channel_params.DoA_phi(1:num_path_limited);
+            channel_params_all_BS(BS_count).DoA_theta=channel_params.DoA_theta(1:num_path_limited);
+            channel_params_all_BS(BS_count).phase=channel_params.phase(1:num_path_limited);
+            channel_params_all_BS(BS_count).ToA=channel_params.ToA(1:num_path_limited);
+            channel_params_all_BS(BS_count).power=1e-3*(10.^(0.1*(channel_params.power(1:num_path_limited) +(transmit_power-tx_power_raytracing))));
+            channel_params_all_BS(BS_count).Doppler_vel=channel_params.Doppler_vel(1:num_path_limited);
+            channel_params_all_BS(BS_count).Doppler_acc=channel_params.Doppler_acc(1:num_path_limited);
+            channel_params_all_BS(BS_count).num_paths=num_path_limited;
+            channel_params_all_BS(BS_count).loc=channels{Receiver_BS_index}.rx_loc;
+            channel_params_all_BS(BS_count).distance=channels{Receiver_BS_index}.dist;
+            channel_params_all_BS(BS_count).pathloss=channels{Receiver_BS_index}.PL;
+            channel_params_all_BS(BS_count).LoS_status=channels{Receiver_BS_index}.LOS_status;
+            
+            if comm
+                dc.add_ToA(channel_params_all_BS(BS_count).power, channel_params_all_BS(BS_count).ToA);
+            end
+        else
+            channel_params_all_BS(BS_count).DoD_phi=[];
+            channel_params_all_BS(BS_count).DoD_theta=[];
+            channel_params_all_BS(BS_count).DoA_phi=[];
+            channel_params_all_BS(BS_count).DoA_theta=[];
+            channel_params_all_BS(BS_count).phase=[];
+            channel_params_all_BS(BS_count).ToA=[];
+            channel_params_all_BS(BS_count).power=[];
+            channel_params_all_BS(BS_count).Doppler_vel=[];
+            channel_params_all_BS(BS_count).Doppler_acc=[];
+            channel_params_all_BS(BS_count).num_paths=0;
+            channel_params_all_BS(BS_count).loc=channels{Receiver_BS_index}.rx_loc;
+            channel_params_all_BS(BS_count).distance=channels{Receiver_BS_index}.dist;
+            channel_params_all_BS(BS_count).pathloss=[];
+            channel_params_all_BS(BS_count).LoS_status=channels{Receiver_BS_index}.LOS_status;
+        end
+        BS_count = double(BS_count + 1);
+    end
+    if comm
+        dc.print_warnings('BS', BS_ID);
+        dc.reset()
+    end
 end
+
 channel_params_BS=channel_params_all_BS(1,:);
-
-
-%% Loading current active basestation location
-TX_Loc_array=importdata(strcat(scenario_files, '.TX_Loc.mat')); %Reading transmitter locations
-BS_loc = TX_Loc_array(BS_ID,2:4); %Select current active basestation location
 
 end
