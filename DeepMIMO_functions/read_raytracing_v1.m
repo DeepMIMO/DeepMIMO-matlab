@@ -5,7 +5,7 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params,channel_params_BS,BS_loc]=read_raytracing(BS_ID, params, scenario_files)
+function [channel_params,channel_params_BS,BS_loc]=read_raytracing_v1(BS_ID, params, scenario_files)
 %% Loading channel parameters between current active basesation transmitter and user receivers
 filename_DoD=strcat(scenario_files, '.', int2str(BS_ID),'.DoD.mat');
 filename_DoA=strcat(scenario_files, '.', int2str(BS_ID),'.DoA.mat');

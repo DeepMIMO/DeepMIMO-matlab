@@ -5,14 +5,15 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params_user, channel_params_BS, BS_loc]=read_raytracing_new(BS_ID, params, scenario_files, comm)
+function [channel_params_user, channel_params_BS, BS_loc]=read_raytracing_v2(BS_ID, params, scenario_files)
 %% Loading channel parameters between current active basesation transmitter and user receivers
+comm = 1; % For compatibility with DeepVerse reader - may be cleaned later
 
 % Load the scenario files
 BS_ID_map = params.BS_ID_map;
 %%% user_ID_map = params.user_ID_map;
 
-filename_BSBS_all = strcat(scenario_files,'_TX', int2str(BS_ID_map(BS_ID,2)),'.mat'); %%%%&&&&%%%%
+filename_BSBS_all = strcat(scenario_files,'TX', int2str(BS_ID_map(BS_ID,2)),'.mat'); %%%%&&&&%%%%
 channels = importdata(filename_BSBS_all);
 %%% total_num_BSs = size(BS_ID_map,1);
 num_paths = double(params.num_paths);

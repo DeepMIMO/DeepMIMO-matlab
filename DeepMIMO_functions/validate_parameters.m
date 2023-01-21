@@ -37,11 +37,72 @@ function [params, params_inner] = additional_params(params)
     
     scenario_folder = fullfile(params_inner.dataset_folder, params.scenario);
     assert(logical(exist(scenario_folder, 'dir')), ['There is no scenario named "' params.scenario '" in the folder "' scenario_folder '/"' '. Please make sure the scenario name is correct and scenario files are downloaded and placed correctly.']);
-
+    
     % Determine if the scenario is dynamic
     params_inner.dynamic_scenario = 0;
     if ~isempty(strfind(params.scenario, 'dyn'))
         params_inner.dynamic_scenario = 1;
+    end
+
+    % Check data version and load parameters of the scenario
+    params_inner.data_format_version = check_data_version(scenario_folder);
+    version_postfix = strcat('v', num2str(params_inner.data_format_version));
+    
+    % Load Scenario Parameters (version specific)
+    load_scenario_params_fun = strcat('load_scenario_params_', version_postfix);
+    [params, params_inner] = feval(load_scenario_params_fun, params, params_inner);
+    
+    % Select raytracing function (version specific)
+    params_inner.raytracing_fn = strcat('read_raytracing_', version_postfix);
+    
+    
+    params.symbol_duration = (params.num_OFDM) / (params.bandwidth*1e9);
+    params.num_active_BS =  length(params.active_BS);
+    
+    assert(params.row_subsampling<=1 & params.row_subsampling>0, 'Row subsampling parameters must be selected in (0, 1]')
+    assert(params.user_subsampling<=1 & params.user_subsampling>0, 'User subsampling parameters must be selected in (0, 1]')
+
+    [params.user_ids, params.num_user] = find_users(params);
+end
+
+function version = check_data_version(scenario_folder)
+    new_params_file = fullfile(scenario_folder, 'params.mat');
+    if exist(new_params_file, 'file') == 0
+        version = 1;
+    else
+        load(new_params_file)
+    end
+end
+
+function [params, params_inner] = load_scenario_params_v2(params, params_inner)
+  
+    if params_inner.dynamic_scenario == 1 % TO BE UPDATED for new format
+        list_of_folders = strsplit(sprintf('scene_%i--', params.scene_first-1:params.scene_last-1),'--');
+        list_of_folders(end) = [];
+        list_of_folders = fullfile(params_inner.dataset_folder, params.scenario, list_of_folders);
+    else
+        list_of_folders = {fullfile(params_inner.dataset_folder, params.scenario, 'scene_1_')};
+    end
+    params_inner.list_of_folders = list_of_folders;
+    
+    % Read scenario parameters
+    params_inner.scenario_files=params_inner.list_of_folders{1}; % The initial of all the scenario files
+    params_file = fullfile(params_inner.dataset_folder, params.scenario, 'params.mat');
+    
+    load(params_file) % Scenario parameter file
+    
+    params.carrier_freq = carrier_freq; % in Hz
+    params.transmit_power_raytracing = transmit_power; % in dB
+    params.user_grids = user_grids;
+    params.num_BS = num_BS;
+    params.BS_grids = BS_grids;
+    params.BS_ID_map = TX_ID_map; % New addition for the new data format
+    
+end
+
+function [params, params_inner] = load_scenario_params_v1(params, params_inner)
+  
+    if params_inner.dynamic_scenario == 1 % TO BE UPDATED FOR SUPPORT
         list_of_folders = strsplit(sprintf('/scene_%i/--', params.scene_first-1:params.scene_last-1),'--');
         list_of_folders(end) = [];
         list_of_folders = fullfile(params_inner.dataset_folder, params.scenario, list_of_folders);
@@ -53,24 +114,17 @@ function [params, params_inner] = additional_params(params)
     % Read scenario parameters
     params_inner.scenario_files=fullfile(list_of_folders{1}, params.scenario); % The initial of all the scenario files
     load([params_inner.scenario_files, '.params.mat']) % Scenario parameter file
-
+    params.carrier_freq = carrier_freq; % in Hz
+    params.transmit_power_raytracing = transmit_power; % in dBm
+    params.user_grids = user_grids;
+    params.num_BS = num_BS;
+    
     % BS-BS channel parameters
     if params.enable_BS2BSchannels
         load([params_inner.scenario_files, '.BSBS.params.mat']) % BS2BS parameter file
         params.BS_grids = BS_grids;
     end
-
-    params.symbol_duration = (params.num_OFDM) / (params.bandwidth*1e9);
-    params.carrier_freq = carrier_freq; % in Hz
-    params.transmit_power_raytracing = transmit_power; % in dBm
-    params.user_grids = user_grids;
-    params.num_BS = num_BS;
-    params.num_active_BS =  length(params.active_BS);
     
-    assert(params.row_subsampling<=1 & params.row_subsampling>0, 'Row subsampling parameters must be selected in (0, 1]')
-    assert(params.user_subsampling<=1 & params.user_subsampling>0, 'User subsampling parameters must be selected in (0, 1]')
-
-    [params.user_ids, params.num_user] = find_users(params);
 end
 
 % Check the validity of the given parameters

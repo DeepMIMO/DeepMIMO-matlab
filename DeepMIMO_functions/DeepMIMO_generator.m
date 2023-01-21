@@ -15,7 +15,7 @@ function [DeepMIMO_dataset, params] = DeepMIMO_generator(params)
     if params_inner.dynamic_scenario
         for f = 1:length(params_inner.list_of_folders)
             fprintf('\nGenerating Scene %i/%i', f, length(params_inner.list_of_folders))
-            params.scenario_files = fullfile(params_inner.list_of_folders{f}, params.scenario); % The initial of all the scenario files
+            params.scenario_files = params_inner.list_of_folders{f}; % The initial of all the scenario files
             DeepMIMO_scene{f} = generate_data(params, params_inner);
             param{f} = params;
         end
@@ -55,7 +55,7 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
     for t=1:params.num_active_BS
         bs_ID = params.active_BS(t);
         fprintf('\n Basestation %i', bs_ID);
-        [TX{t}.channel_params, TX{t}.channel_params_BSBS, TX{t}.loc] = read_raytracing(bs_ID, params, params_inner.scenario_files);
+        [TX{t}.channel_params, TX{t}.channel_params_BSBS, TX{t}.loc] = feval(params_inner.raytracing_fn, bs_ID, params, params_inner.scenario_files);
     end
 
     % Constructing the channel matrices from ray-tracing
