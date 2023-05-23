@@ -77,6 +77,12 @@ else
     LP_fn = pulse_sinc(d_ext.'-delay_normalized);
     conv_vec = exp(1j*params_user.phase*ang_conv).*sqrt(power/params.num_OFDM) .* LP_fn; %Power of the paths and phase
 
+		if params.enable_Doppler
+			d_time = Ts*(d_ext.');
+			Doppler_phase = exp(-1j*2*pi*params.carrier_freq*( ((params_user.Doppler_vel.*d_time)./physconst('LightSpeed')) + ((params_user.Doppler_acc.*(d_time.^2))./(2*physconst('LightSpeed'))) ));
+			conv_vec = conv_vec .* Doppler_phase; %Power of the paths and phase
+		end
+
     channel = sum(reshape(array_response_RX, M_RX, 1, 1, []) .* reshape(array_response_TX, 1, M_TX, 1, []) .* reshape(conv_vec, 1, 1, [], params_user.num_paths), 4);
     channel = sum(reshape(channel, M_RX, M_TX, 1, []) .* reshape(delay_d_conv, 1, 1, num_sampled_subcarriers, []), 4);
 end
