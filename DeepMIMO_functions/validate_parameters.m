@@ -81,7 +81,7 @@ function [params, params_inner] = load_scenario_params_v2(params, params_inner)
         list_of_folders(end) = [];
         list_of_folders = fullfile(params_inner.dataset_folder, params.scenario, list_of_folders);
     else
-        list_of_folders = {fullfile(params_inner.dataset_folder, params.scenario, 'scene_1_')};
+        list_of_folders = {fullfile(params_inner.dataset_folder, params.scenario)};
     end
     params_inner.list_of_folders = list_of_folders;
     
@@ -95,14 +95,36 @@ function [params, params_inner] = load_scenario_params_v2(params, params_inner)
     params.transmit_power_raytracing = transmit_power; % in dB
     params.user_grids = user_grids;
     params.num_BS = num_BS;
-    params.BS_grids = BS_grids;
-    params.BS_ID_map = TX_ID_map; % New addition for the new data format
+    %params.BS_grids = BS_grids;
+    %params.BS_ID_map = TX_ID_map; % New addition for the new data format
     
+    % Get a list of UE split
+    fileList = dir(fullfile(params_inner.scenario_files, '*.mat'));
+    filePattern = 'BS1_UE_(\d+)-(\d+)\.mat';
+
+    number1 = [];
+    number2 = [];
+
+    % Loop through each file and extract the numbers
+    for i = 1:numel(fileList)
+        filename = fileList(i).name;
+
+        % Check if the file name matches the pattern
+        match = regexp(filename, filePattern, 'tokens');
+
+        if ~isempty(match)
+            % Extract the numbers from the file name
+            number1 = [number1 str2double(match{1}{1})];
+            number2 = [number2 str2double(match{1}{2})];
+        end
+    end
+    params_inner.UE_file_split = [number1; number2];
+
 end
 
 function [params, params_inner] = load_scenario_params_v1(params, params_inner)
   
-    if params_inner.dynamic_scenario == 1 % TO BE UPDATED FOR SUPPORT
+    if params_inner.dynamic_scenario == 1
         list_of_folders = strsplit(sprintf('/scene_%i/--', params.scene_first-1:params.scene_last-1),'--');
         list_of_folders(end) = [];
         list_of_folders = fullfile(params_inner.dataset_folder, params.scenario, list_of_folders);

@@ -2,8 +2,8 @@
 % A detailed description of the parameters is available on DeepMIMO.net
 
 %Ray-tracing scenario
-params.dataset_folder = 'C:\Users\Umt\Desktop\p2m_data\';
-params.scenario = 'I3_60';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
+params.dataset_folder = 'C:\Users\Umt\Desktop\Boston5G_3p5_small\';
+params.scenario = 'Boston5G_3p5_v1';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
 
 %Dynamic Scenario Scenes [only for dynamic (multiple-scene) scenarios]
 params.scene_first = 1;
@@ -14,7 +14,7 @@ params.active_BS = [1];             % Includes the numbers of the active BSs (va
 
 % Active users
 params.active_user_first = 1;       % The first row of the considered user section (check the scenario description for the user row map)
-params.active_user_last = 1;        % The last row of the considered user section (check the scenario description for the user row map)
+params.active_user_last = 160;        % The last row of the considered user section (check the scenario description for the user row map)
 
 % Subsampling of active users
 %--> Setting both subsampling parameters to 1 activate all the users indicated previously

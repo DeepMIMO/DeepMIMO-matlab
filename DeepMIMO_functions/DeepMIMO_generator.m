@@ -55,7 +55,7 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
     for t=1:params.num_active_BS
         bs_ID = params.active_BS(t);
         fprintf('\n Basestation %i', bs_ID);
-        [TX{t}.channel_params, TX{t}.channel_params_BSBS, TX{t}.loc] = feval(params_inner.raytracing_fn, bs_ID, params, params_inner.scenario_files);
+        [TX{t}.channel_params, TX{t}.channel_params_BSBS, TX{t}.loc] = feval(params_inner.raytracing_fn, bs_ID, params, params_inner);
     end
 
     % Constructing the channel matrices from ray-tracing
@@ -81,7 +81,7 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
 
             % Location, LOS status, distance, pathloss, and channel path parameters
             DeepMIMO_dataset{t}.user{user}.loc=TX{t}.channel_params(user).loc;
-            DeepMIMO_dataset{t}.user{user}.LoS_status=TX{t}.channel_params(user).LoS_status;
+            % DeepMIMO_dataset{t}.user{user}.LoS_status=TX{t}.channel_params(user).LoS_status;
             DeepMIMO_dataset{t}.user{user}.distance=TX{t}.channel_params(user).distance;
             DeepMIMO_dataset{t}.user{user}.pathloss=TX{t}.channel_params(user).pathloss;
             DeepMIMO_dataset{t}.user{user}.path_params=rmfield(TX{t}.channel_params(user),{'loc','distance','pathloss'});
@@ -103,7 +103,7 @@ function DeepMIMO_dataset = generate_data(params, params_inner)
 
                 % Location, LOS status, distance, pathloss, and channel path parameters
                 DeepMIMO_dataset{t}.basestation{BSreceiver}.loc=TX{t}.channel_params_BSBS(BSreceiver).loc;
-                DeepMIMO_dataset{t}.basestation{BSreceiver}.LoS_status=TX{t}.channel_params_BSBS(BSreceiver).LoS_status;
+                % DeepMIMO_dataset{t}.basestation{BSreceiver}.LoS_status=TX{t}.channel_params_BSBS(BSreceiver).LoS_status;
                 DeepMIMO_dataset{t}.basestation{BSreceiver}.distance=TX{t}.channel_params_BSBS(BSreceiver).distance;
                 DeepMIMO_dataset{t}.basestation{BSreceiver}.pathloss=TX{t}.channel_params_BSBS(BSreceiver).pathloss;
                 DeepMIMO_dataset{t}.basestation{BSreceiver}.path_params=rmfield(TX{t}.channel_params_BSBS(BSreceiver),{'loc','distance','pathloss'});
