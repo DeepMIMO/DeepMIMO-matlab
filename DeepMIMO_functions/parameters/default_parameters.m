@@ -20,6 +20,7 @@ params.active_user_last = 1;        % The last row of the considered user sectio
 params.row_subsampling = 1;         % Randomly select round(row_subsampling*(active_user_last-params.active_user_first)) rows
 params.user_subsampling = 1;        % Randomly select round(user_subsampling*number_of_users_in_row) users in each row
 
+%% Antenna Parameters
 % Antenna array dimensions
 params.num_ant_BS = [1, 8, 4];      % Number of antenna elements for the BS arrays in the x,y,z-axes
 % By defauly, all BSs will have the same array sizes
@@ -30,8 +31,10 @@ params.num_ant_BS = [1, 8, 4];      % Number of antenna elements for the BS arra
 
 params.num_ant_UE = [1, 4, 2];      % Number of antenna elements for the user arrays in the x,y,z-axes
 
+params.FoV_ant_BS = [180, 180]; % Degrees in horizontal-vertical
+params.FoV_ant_UE = [360, 360]; % Degrees in horizontal-vertical
+
 % Antenna array orientations
-params.activate_array_rotation = 0; % 0 -> no array rotation - 1 -> apply the array rotation defined in params.array_rotation_BS
 params.array_rotation_BS = [5, 10, 20];         
 % 3D rotation angles in degrees around the x,y,z axes respectively
 % The rotations around x,y,z are also called as slant, downtilt, and bearing angles (of an antenna towards +x)
@@ -47,8 +50,6 @@ params.array_rotation_UE = [0, 30, 0];
 % [x_min, x_max], [y_min, y_max], [z_min, z_max]
 % set [[x_min, x_max]; [y_min, y_max]; [z_min, z_max]]
 % params.array_rotation_UE = [[0, 30]; [30, 60]; [60, 90]]; 
-
-params.enable_BS2BSchannels = 1;      % Enable generating BS to BS channel (could be useful for IAB, RIS, repeaters, etc.) 
 
 % Antenna array spacing
 params.ant_spacing_BS = .5;           % ratio of the wavelength; for half wavelength enter .5
@@ -70,8 +71,7 @@ params.num_paths = 5;                 % Maximum number of paths to be considered
 
 % OFDM parameters
 params.num_OFDM = 512;                % Number of OFDM subcarriers
-params.OFDM_sampling_factor = 1;      % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
-params.OFDM_limit = 64;               % Only the first params.OFDM_limit subcarriers will be considered  
+params.OFDM_sampling = [2:3];         % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
 
 params.enable_Doppler = 0; 						% Enable Doppler shift (if available in the scenario)
 

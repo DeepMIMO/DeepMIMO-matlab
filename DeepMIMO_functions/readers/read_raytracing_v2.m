@@ -12,8 +12,8 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
     transmit_power = 30; % Target TX power in dBm (1 Watt transmit power)
     power_diff = transmit_power-tx_power_raytracing;
 
-    channel_params_all = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LOS',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
-    channel_params_all_BS = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LOS',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
+    channel_params_all = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
+    channel_params_all_BS = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
 
     dc = duration_check(params.symbol_duration);
 
@@ -89,7 +89,7 @@ function x = parse_data(num_paths, paths, info, power_diff)
         x.DoA_theta = paths(5, 1:num_paths);
         x.DoD_phi = paths(6, 1:num_paths);
         x.DoD_theta = paths(7, 1:num_paths);
-        x.LOS = paths(8, 1:num_paths);
+        x.LoS_status = paths(8, 1:num_paths);
         % channel_params_all(user_count).Doppler_vel=channel_params.Doppler_vel(1:num_path_limited);
         % channel_params_all(user_count).Doppler_acc=channel_params.Doppler_acc(1:num_path_limited);
     else
@@ -100,7 +100,7 @@ function x = parse_data(num_paths, paths, info, power_diff)
         x.DoA_theta = [];
         x.DoD_phi = [];
         x.DoD_theta = [];
-        x.LOS = [];
+        x.LoS_status = [];
     end
 
     %add_info = data.rx_locs(ue_idx_file, :);

@@ -7,14 +7,14 @@
 
 function [params, params_inner] = validate_parameters(params)
 
-    [params] = compare_with_default_params(params);
-    
-    [params, params_inner] = additional_params(params);
+    [params] = compareWithDefaultParameters(params);
+    [params, params_inner] = additionalParameters(params);
 
-    params_inner = validate_OFDM_params(params, params_inner);
+    params_inner = validateAntennaParameters(params, params_inner);
+    params = validateChannelParameters(params);
 end
 
-function [params, params_inner] = additional_params(params)
+function [params, params_inner] = additionalParameters(params)
 
     % Add dataset path
     if ~isfield(params, 'dataset_folder')
@@ -45,7 +45,7 @@ function [params, params_inner] = additional_params(params)
     end
 
     % Check data version and load parameters of the scenario
-    params_inner.data_format_version = check_data_version(scenario_folder);
+    params_inner.data_format_version = checkDataVersion(scenario_folder);
     version_postfix = strcat('v', num2str(params_inner.data_format_version));
     
     % Load Scenario Parameters (version specific)
@@ -58,14 +58,12 @@ function [params, params_inner] = additional_params(params)
     
     params.symbol_duration = (params.num_OFDM) / (params.bandwidth*1e9);
     params.num_active_BS =  length(params.active_BS);
-    
-    assert(params.row_subsampling<=1 & params.row_subsampling>0, 'Row subsampling parameters must be selected in (0, 1]')
-    assert(params.user_subsampling<=1 & params.user_subsampling>0, 'User subsampling parameters must be selected in (0, 1]')
 
+    validateUserParameters(params);
     [params.user_ids, params.num_user] = find_users(params);
 end
 
-function version = check_data_version(scenario_folder)
+function version = checkDataVersion(scenario_folder)
     new_params_file = fullfile(scenario_folder, 'params.mat');
     if exist(new_params_file, 'file') == 0
         version = 1;
@@ -98,28 +96,8 @@ function [params, params_inner] = load_scenario_params_v2(params, params_inner)
     %params.BS_grids = BS_grids;
     %params.BS_ID_map = TX_ID_map; % New addition for the new data format
     
-    % Get a list of UE split
-    fileList = dir(fullfile(params_inner.scenario_files, '*.mat'));
-    filePattern = 'BS1_UE_(\d+)-(\d+)\.mat';
-
-    number1 = [];
-    number2 = [];
-
-    % Loop through each file and extract the numbers
-    for i = 1:numel(fileList)
-        filename = fileList(i).name;
-
-        % Check if the file name matches the pattern
-        match = regexp(filename, filePattern, 'tokens');
-
-        if ~isempty(match)
-            % Extract the numbers from the file name
-            number1 = [number1 str2double(match{1}{1})];
-            number2 = [number2 str2double(match{1}{2})];
-        end
-    end
-    params_inner.UE_file_split = [number1; number2];
-
+    params_inner = findUserFileSplit(params_inner);
+    
 end
 
 function [params, params_inner] = load_scenario_params_v1(params, params_inner)
@@ -142,16 +120,14 @@ function [params, params_inner] = load_scenario_params_v1(params, params_inner)
     params.num_BS = num_BS;
     
     % BS-BS channel parameters
-    if params.enable_BS2BSchannels
-        load([params_inner.scenario_files, '.BSBS.params.mat']) % BS2BS parameter file
-        params.BS_grids = BS_grids;
-    end
+    load([params_inner.scenario_files, '.BSBS.params.mat']) % BS2BS parameter file
+    params.BS_grids = BS_grids;
     
 end
 
 % Check the validity of the given parameters
 % Add default parameters if they don't exist in the current file
-function [params] = compare_with_default_params(params)
+function [params] = compareWithDefaultParameters(params)
     default_params = read_params('default_parameters.m');
     default_fields = fieldnames(default_params);
     fields = fieldnames(params);
@@ -176,59 +152,62 @@ function [params] = compare_with_default_params(params)
     end
 end
 
-function [params_inner] = validate_OFDM_params(params, params_inner)
+function [params_inner] = validateAntennaParameters(params, params_inner)
+    
+    params_inner = checkAntennaSize(params, params_inner);
+    params_inner = checkAntennaOrientation(params, params_inner);
+    params_inner = checkAntennaSpacing(params, params_inner);
+    
+end
+
+function params_inner = checkAntennaSize(params, params_inner)
     % Check UE antenna size
     ant_size = size(params.num_ant_UE);
-    assert(ant_size(2) == 3, 'The defined user antenna panel size must be 3 dimensional (in x-y-z)')
+    assert(ant_size(2) == 2, 'The defined user antenna panel size must be 2 dimensional [horizontal, vertical]')
 
     % Check BS antenna size
     ant_size = size(params.num_ant_BS);
-    assert(ant_size(2) == 3, 'The defined BS antenna panel size must be 3 dimensional (in x-y-z)')
+    assert(ant_size(2) == 2, 'The defined BS antenna panel size must be 2 dimensional [horizontal, vertical]')
     if ant_size(1) ~= params.num_active_BS
         if ant_size(1) == 1
             params_inner.num_ant_BS = repmat(params.num_ant_BS, params.num_active_BS, 1);
         else
-            error('The defined BS antenna panel size must be either 1x3 or Nx3 dimensional, where N is the number of active BSs.')
+            error('The defined BS antenna panel size must be either 1x2 or Nx2 dimensional, where N is the number of active BSs.')
         end
     else
         params_inner.num_ant_BS = params.num_ant_BS;
     end
+end
 
-    % Check BS and UE antenna array (panel) orientation
-    if params.activate_array_rotation
-        array_rotation_size = size(params.array_rotation_BS);
-        assert(array_rotation_size(2) == 3, 'The defined BS antenna array rotation must be 3 dimensional (rotation angles around x-y-z axes)')
-        if array_rotation_size(1) ~= params.num_active_BS
-            if array_rotation_size(1) == 1
-                params_inner.array_rotation_BS = repmat(params.array_rotation_BS, params.num_active_BS, 1);
-            else
-                error('The defined BS antenna array rotation size must be either 1x3 or Nx3 dimensional, where N is the number of active BSs.')
-            end
+function params_inner = checkAntennaOrientation(params, params_inner)
+    % BS Antennas
+    array_rotation_size = size(params.array_rotation_BS);
+    assert(array_rotation_size(2) == 3, 'The defined BS antenna array rotation must be 3 dimensional (rotation angles around x-y-z axes)')
+    if array_rotation_size(1) ~= params.num_active_BS
+        if array_rotation_size(1) == 1
+            params_inner.array_rotation_BS = repmat(params.array_rotation_BS, params.num_active_BS, 1);
         else
-            params_inner.array_rotation_BS = params.array_rotation_BS;
+            error('The defined BS antenna array rotation size must be either 1x3 or Nx3 dimensional, where N is the number of active BSs.')
         end
     else
-        params_inner.array_rotation_BS = zeros(params.num_active_BS,3);
+        params_inner.array_rotation_BS = params.array_rotation_BS;
     end
-
-    % Check UE antenna array (panel) orientation
-    if params.activate_array_rotation
-        array_rotation_size = size(params.array_rotation_UE);
-        if array_rotation_size(1) == 1 && array_rotation_size(2) == 3
-            params_inner.array_rotation_UE = repmat(params.array_rotation_UE, params.num_user, 1);
-        elseif array_rotation_size(1) == 3 && array_rotation_size(2) == 2
-            params_inner.array_rotation_UE = zeros(params.num_user, 3);
-            for i = 1:3
-                params_inner.array_rotation_UE(:, i) = unifrnd(params.array_rotation_UE(i, 1), params.array_rotation_UE(i, 2), params.num_user, 1);
-            end
-        else
-            error('The defined user antenna array rotation size must be either 1x3 for fixed, or 3x2 for random generation.')
-        end
-    else
+    
+    % UE Antennas
+    array_rotation_size = size(params.array_rotation_UE);
+    if array_rotation_size(1) == 1 && array_rotation_size(2) == 3
+        params_inner.array_rotation_UE = repmat(params.array_rotation_UE, params.num_user, 1);
+    elseif array_rotation_size(1) == 3 && array_rotation_size(2) == 2
         params_inner.array_rotation_UE = zeros(params.num_user, 3);
+        for i = 1:3
+            params_inner.array_rotation_UE(:, i) = unifrnd(params.array_rotation_UE(i, 1), params.array_rotation_UE(i, 2), params.num_user, 1);
+        end
+    else
+        error('The defined user antenna array rotation size must be either 1x3 for fixed, or 3x2 for random generation.')
     end
-    
-    
+end
+
+function params_inner = checkAntennaSpacing(params, params_inner)
     % Check BS antenna spacing
     ant_spacing_size = length(params.ant_spacing_BS);
     if ant_spacing_size ~= params.num_active_BS
@@ -240,6 +219,46 @@ function [params_inner] = validate_OFDM_params(params, params_inner)
     else
         params_inner.ant_spacing_BS = params.ant_spacing_BS;
     end
+end
 
-    
+% Find how the user files are split to multiple files with subset of users
+% E.g., 0-10k 10k-20k ... etc
+function params_inner = findUserFileSplit(params_inner)
+    % Get a list of UE split
+    fileList = dir(fullfile(params_inner.scenario_files, '*.mat'));
+    filePattern = 'BS1_UE_(\d+)-(\d+)\.mat';
+
+    number1 = [];
+    number2 = [];
+
+    % Loop through each file and extract the numbers
+    for i = 1:numel(fileList)
+        filename = fileList(i).name;
+
+        % Check if the file name matches the pattern
+        match = regexp(filename, filePattern, 'tokens');
+
+        if ~isempty(match)
+            % Extract the numbers from the file name
+            number1 = [number1 str2double(match{1}{1})];
+            number2 = [number2 str2double(match{1}{2})];
+        end
+    end
+    params_inner.UE_file_split = [number1; number2];
+end
+
+function [] = validateUserParameters(params)
+    assert(params.row_subsampling<=1 & params.row_subsampling>0, 'Row subsampling parameters must be selected in (0, 1]')
+    assert(params.user_subsampling<=1 & params.user_subsampling>0, 'User subsampling parameters must be selected in (0, 1]')
+
+    assert(params.active_user_last <= params.user_grids(end, 2) & params.active_user_last >= 1, sprintf('There are total %i user rows in the scenario, please select the active user first and last in [1, %i]', params.user_grids(end, 2), params.user_grids(end, 2)));
+    assert(params.active_user_first <= params.active_user_last, 'active_user_last parameter must be greater than or equal to active_user_first');
+end
+
+function params = validateChannelParameters(params)
+    if params.generate_OFDM_channels   
+        if sum(params.OFDM_sampling > params.num_OFDM) + sum(params.OFDM_sampling < 1) ~= 0
+            error(sprintf('The OFDM_sampling variables must be a vector of values in [1, %i]', params.num_OFDM))
+        end
+    end
 end

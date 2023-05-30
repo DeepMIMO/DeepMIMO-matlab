@@ -1,11 +1,11 @@
 % ----------------- Add the path of DeepMIMO function --------------------%
-addpath('DeepMIMO_functions')
+addpath(genpath('DeepMIMO_functions'))
 
 % -------------------- DeepMIMO Dataset Generation -----------------------%
 % Load Dataset Parameters
 dataset_params = read_params('parameters.m');
 [DeepMIMO_dataset, dataset_params] = DeepMIMO_generator(dataset_params);
-
+plot_los_status(DeepMIMO_dataset, 1)
 % -------------------------- Output Examples -----------------------------%
 % DeepMIMO_dataset{i}.user{j}.channel % Channel between BS i - User j
 % %  (# of User antennas) x (# of BS antennas) x (# of OFDM subcarriers)
