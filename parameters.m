@@ -3,7 +3,7 @@
 
 %Ray-tracing scenario
 params.dataset_folder = 'C:\Users\Umt\Desktop\Boston5G_3p5_small';
-params.scenario = 'Boston5G_3p5_v1';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
+params.scenario = 'Boston5G_3p5_v2';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
 
 %Dynamic Scenario Scenes [only for dynamic (multiple-scene) scenarios]
 params.scene_first = 1;
@@ -31,7 +31,7 @@ params.num_ant_BS = [1, 1];      % Number of antenna elements for the BS arrays 
 
 params.num_ant_UE = [1, 1];      % Number of antenna elements for the user arrays in the x,y,z-axes
 
-params.FoV_ant_BS = [360, 180]; % Degrees in horizontal-vertical
+params.FoV_ant_BS = [360, 360]; % Degrees in horizontal-vertical
 params.FoV_ant_UE = [360, 360]; % Degrees in horizontal-vertical
 
 % Antenna array orientations
@@ -55,10 +55,13 @@ params.array_rotation_UE = [0, 0, 0];
 params.ant_spacing_BS = .5;           % ratio of the wavelength; for half wavelength enter .5
 params.ant_spacing_UE = .5;           % ratio of the wavelength; for half wavelength enter .5
 
+
 % Antenna element radiation pattern
 params.radiation_pattern = 0;         % 0: Isotropic and 
                                       % 1: Half-wave dipole
-                                    
+                 
+params.dual_polar = 1;
+
 % System parameters
 params.bandwidth = 0.05;              % The bandwidth in GHz
 params.activate_RX_filter = 0;        % 0 No RX filter 

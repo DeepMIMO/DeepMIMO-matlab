@@ -5,7 +5,9 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(BS_ID, params, params_inner)
+function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(BS_ID, params, params_inner, channel_extension)
+
+    data_key_name = strcat('channels_', channel_extension);
 
     num_paths = double(params.num_paths);
     tx_power_raytracing = params.transmit_power_raytracing;  % Current TX power in dBm
@@ -35,10 +37,10 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
         end
 
         ue_idx_file = ue_idx - user_start;
-        max_paths = double(size(data.channels{ue_idx_file}.p, 2));
+        max_paths = double(size(data.(data_key_name){ue_idx_file}.p, 2));
         num_path_limited = double(min(num_paths, max_paths));
 
-        channel_params = data.channels{ue_idx_file}.p;
+        channel_params = data.(data_key_name){ue_idx_file}.p;
         add_info = data.rx_locs(ue_idx_file, :);
         channel_params_all(user_count) = parse_data(num_path_limited, channel_params, add_info, power_diff);
         dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
@@ -57,10 +59,10 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
     data = importdata(fullfile(params_inner.scenario_files, filename));
     for bs_idx = params.active_BS
 
-        max_paths = double(size(data.channels{bs_idx}.p, 2));
+        max_paths = double(size(data.(data_key_name){bs_idx}.p, 2));
         num_path_limited = double(min(num_paths, max_paths));
 
-        channel_params = data.channels{bs_idx}.p;
+        channel_params = data.(data_key_name){bs_idx}.p;
         add_info = data.rx_locs(bs_idx, :);
 
         if bs_idx == BS_ID

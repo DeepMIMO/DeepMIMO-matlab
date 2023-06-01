@@ -12,8 +12,8 @@ function [DoD_theta_LCS, DoD_phi_LCS, DoA_theta_LCS, DoA_phi_LCS] = antenna_rota
     % chose scenario to the "the local coordinate systems" (x',y',z') relative
     % to the new panel orientation
 
-    [DoD_theta_LCS,DoD_phi_LCS]= rotateAngles(TX_rot,DoD_theta_GCS,DoD_phi_GCS);
-    [DoA_theta_LCS,DoA_phi_LCS]= rotateAngles(RX_rot,DoA_theta_GCS,DoA_phi_GCS);
+    [DoD_theta_LCS,DoD_phi_LCS]= rotateAngles(TX_rot, DoD_theta_GCS, DoD_phi_GCS);
+    [DoA_theta_LCS,DoA_phi_LCS]= rotateAngles(RX_rot, DoA_theta_GCS, DoA_phi_GCS);
 end
 
 

@@ -29,7 +29,11 @@ function [channel, channel_LoS_status]=construct_DeepMIMO_channel(tx_ant_size, t
         return
     end
 
-    % Change the DoD and DoA angles based on the panel orientations
+    %% Change the DoD and DoA angles based on the panel orientations
+    %% Let's split this to two parts
+    %% Change the actual angles (path_params.DoD etc.)
+    %% We need to fix the following rotation to work together with the FoV
+    %%
     [DoD_theta, DoD_phi, DoA_theta, DoA_phi] = antenna_rotation(tx_rotation, path_params.DoD_theta, path_params.DoD_phi, rx_rotation, path_params.DoA_theta, path_params.DoA_phi);
 
     % Apply the radiation pattern of choice
@@ -39,8 +43,11 @@ function [channel, channel_LoS_status]=construct_DeepMIMO_channel(tx_ant_size, t
         power = path_params.power;
     end
 
-    FoV_TX = antenna_FoV(DoA_theta, DoA_phi, params.FoV_ant_BS);
-    FoV_RX = antenna_FoV(DoD_theta, DoD_phi, params.FoV_ant_UE);
+    %% We need FoV_ant_TX and FoV_ant_UE as an input to the function since this won't work for BS-BS channels
+    FoV_RX = antenna_FoV(DoD_theta, DoD_phi, params.FoV_ant_BS);
+    FoV_TX = antenna_FoV(DoA_theta, DoA_phi, params.FoV_ant_UE);
+    
+    %% LoS status computation
     path_params.FoV = FoV_TX & FoV_RX;
     if sum(path_params.FoV) > 0
         channel_LoS_status = sum(path_params.LoS_status & path_params.FoV)>0;
@@ -48,6 +55,8 @@ function [channel, channel_LoS_status]=construct_DeepMIMO_channel(tx_ant_size, t
         channel = complex(zeros(M_RX, M_TX, num_sampled_subcarriers));
         channel_LoS_status = -1;
     end
+    %% We need to check available paths after this..
+    
     
     % TX Array Response - BS
     gamma_TX=+1j*kd_TX*[sind(DoD_theta).*cosd(DoD_phi);

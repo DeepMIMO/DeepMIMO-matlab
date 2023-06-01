@@ -64,6 +64,8 @@ params.bandwidth = 0.05;              % The bandwidth in GHz
 params.activate_RX_filter = 0;        % 0 No RX filter 
                                       % 1 Apply RX low-pass filter (ideal: Sinc in the time domain)
 
+params.dual_polar = 1;
+
 % Channel parameters # Activate OFDM
 params.generate_OFDM_channels = 1;    % 1: activate frequency domain (FD) channel generation for OFDM systems
                                       % 0: activate instead time domain (TD) channel impulse response generation for non-OFDM systems

@@ -9,7 +9,8 @@ function [params, params_inner] = validate_parameters(params)
 
     [params] = compareWithDefaultParameters(params);
     [params, params_inner] = additionalParameters(params);
-
+    [params_inner] = addPolarizationList(params, params_inner);
+    
     params_inner = validateAntennaParameters(params, params_inner);
     params = validateChannelParameters(params);
 end
@@ -97,6 +98,8 @@ function [params, params_inner] = load_scenario_params_v2(params, params_inner)
     %params.BS_ID_map = TX_ID_map; % New addition for the new data format
     
     params_inner = findUserFileSplit(params_inner);
+    params_inner.doppler_available = doppler_available;
+    params_inner.dual_polar_available = dual_polar_available;
     
 end
 
@@ -260,5 +263,13 @@ function params = validateChannelParameters(params)
         if sum(params.OFDM_sampling > params.num_OFDM) + sum(params.OFDM_sampling < 1) ~= 0
             error(sprintf('The OFDM_sampling variables must be a vector of values in [1, %i]', params.num_OFDM))
         end
+    end
+end
+
+function params_inner = addPolarizationList(params, params_inner)
+    if params.dual_polar & params_inner.dual_polar_available
+        params_inner.polarization_list = ["VV", "VH", "HV", "HH"];
+    else
+        params_inner.polarization_list = ["VV"];
     end
 end
