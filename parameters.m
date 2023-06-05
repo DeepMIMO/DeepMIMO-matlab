@@ -22,17 +22,11 @@ params.row_subsampling = 1;         % Randomly select round(row_subsampling*(act
 params.user_subsampling = 1;        % Randomly select round(user_subsampling*number_of_users_in_row) users in each row
 
 % Antenna array dimensions
-params.num_ant_BS = [1, 1];      % Number of antenna elements for the BS arrays in the x,y,z-axes
-% By defauly, all BSs will have the same array sizes
-% To define different array sizes for the selected active BSs, you can add multiple rows. 
-% Example: For two active BSs with a 8x4 y-z UPA in the first BS and 4x4
-% x-z UPA for the second BS, you write  
-% params.num_ant_BS = [[1, 8, 4]; [1, 4, 4]];
+params.num_ant_BS = [8, 1];      % Horizontal - Vertical
+params.num_ant_UE = [1, 1];      % Horizontal - Vertical
 
-params.num_ant_UE = [1, 1];      % Number of antenna elements for the user arrays in the x,y,z-axes
-
-params.FoV_ant_BS = [360, 360]; % Degrees in horizontal-vertical
-params.FoV_ant_UE = [360, 360]; % Degrees in horizontal-vertical
+params.FoV_ant_BS = [120, 120]; % Degrees in horizontal-vertical Max- 360 180
+params.FoV_ant_UE = [360, 180]; % Degrees in horizontal-vertical
 
 % Antenna array orientations
 params.array_rotation_BS = [0, 0, 0];         
@@ -60,7 +54,7 @@ params.ant_spacing_UE = .5;           % ratio of the wavelength; for half wavele
 params.radiation_pattern = 0;         % 0: Isotropic and 
                                       % 1: Half-wave dipole
                  
-params.dual_polar = 1;
+params.dual_polar = 0;
 
 % System parameters
 params.bandwidth = 0.05;              % The bandwidth in GHz
