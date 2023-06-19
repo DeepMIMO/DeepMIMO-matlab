@@ -7,7 +7,11 @@
 
 function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(BS_ID, params, params_inner, channel_extension)
 
-    data_key_name = strcat('channels_', channel_extension);
+    if params.dual_polar
+        data_key_name = strcat('channels_', channel_extension);
+    else
+        data_key_name = 'channels';
+    end
 
     num_paths = double(params.num_paths);
     tx_power_raytracing = params.transmit_power_raytracing;  % Current TX power in dBm
