@@ -18,40 +18,68 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
     transmit_power = 30; % Target TX power in dBm (1 Watt transmit power)
     power_diff = transmit_power-tx_power_raytracing;
 
-    channel_params_all = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
-    channel_params_all_BS = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
-
+    if params_inner.doppler_available
+        channel_params_all = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[],'Doppler_vel',[],'Doppler_acc',[]);
+        channel_params_all_BS = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[],'Doppler_vel',[],'Doppler_acc',[]);
+    else
+        channel_params_all = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
+        channel_params_all_BS = struct('phase',[],'ToA',[],'power',[],'DoA_phi',[],'DoA_theta',[],'DoD_phi',[],'DoD_theta',[],'LoS_status',[],'num_paths',[],'loc',[],'distance',[],'pathloss',[]);
+    end
     dc = duration_check(params.symbol_duration);
 
     file_idx = 1;
     file_loaded = 0;
     user_count = 1;
-    for ue_idx = params.user_ids
-        % If currently not loaded
-        % load the file that user is contained
-        while ue_idx>params_inner.UE_file_split(2, file_idx)
-            file_idx = file_idx + 1;
-            file_loaded = 0;
-        end
-        if ~file_loaded
+        
+    if params_inner.dynamic_scenario
+        if ~isempty(params_inner.UE_file_split)
+            params.num_user = params_inner.UE_file_split(2, file_idx);
             filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(params_inner.UE_file_split(1, file_idx)), '-', num2str(params_inner.UE_file_split(2, file_idx)), '.mat');
             data = importdata(fullfile(params_inner.scenario_files, filename));
             user_start = params_inner.UE_file_split(1, file_idx);
-            file_loaded = 1;
+            
+            for ue_idx = 1:params.num_user
+                ue_idx_file = ue_idx - user_start;
+                max_paths = double(size(data.(data_key_name){ue_idx_file}.p, 2));
+                num_path_limited = double(min(num_paths, max_paths));
+
+                channel_params = data.(data_key_name){ue_idx_file}.p;
+                add_info = data.rx_locs(ue_idx_file, :);
+                channel_params_all(user_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
+                dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
+                
+                user_count = user_count + 1;
+            end
+        else
+            params.num_user = 0;
         end
+    else
+        for ue_idx = params.user_ids
+            % If currently not loaded
+            % load the file that user is contained
+            while ue_idx > params_inner.UE_file_split(2, file_idx)
+                file_idx = file_idx + 1;
+                file_loaded = 0;
+            end
+            if ~file_loaded
+                filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(params_inner.UE_file_split(1, file_idx)), '-', num2str(params_inner.UE_file_split(2, file_idx)), '.mat');
+                data = importdata(fullfile(params_inner.scenario_files, filename));
+                user_start = params_inner.UE_file_split(1, file_idx);
+                file_loaded = 1;
+            end
 
-        ue_idx_file = ue_idx - user_start;
-        max_paths = double(size(data.(data_key_name){ue_idx_file}.p, 2));
-        num_path_limited = double(min(num_paths, max_paths));
+            ue_idx_file = ue_idx - user_start;
+            max_paths = double(size(data.(data_key_name){ue_idx_file}.p, 2));
+            num_path_limited = double(min(num_paths, max_paths));
 
-        channel_params = data.(data_key_name){ue_idx_file}.p;
-        add_info = data.rx_locs(ue_idx_file, :);
-        channel_params_all(user_count) = parse_data(num_path_limited, channel_params, add_info, power_diff);
-        dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
+            channel_params = data.(data_key_name){ue_idx_file}.p;
+            add_info = data.rx_locs(ue_idx_file, :);
+            channel_params_all(user_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
+            dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
 
-        user_count = user_count + 1;
+            user_count = user_count + 1;
+        end
     end
-
     channel_params_user = channel_params_all(1,:);
     
     dc.print_warnings('BS', BS_ID);
@@ -73,7 +101,7 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
             BS_loc = add_info(1:3);
         end
 
-        channel_params_all_BS(user_count) = parse_data(num_path_limited, channel_params, add_info, power_diff);
+        channel_params_all_BS(user_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
         dc.add_ToA(channel_params_all_BS(user_count).power, channel_params_all_BS(user_count).ToA);
 
         user_count = user_count + 1;
@@ -86,7 +114,7 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
 
 end
 
-function x = parse_data(num_paths, paths, info, power_diff)
+function x = parse_data(doppler_available, num_paths, paths, info, power_diff)
     if num_paths > 0
         x.phase = paths(1, 1:num_paths);
         x.ToA = paths(2, 1:num_paths);
@@ -96,8 +124,10 @@ function x = parse_data(num_paths, paths, info, power_diff)
         x.DoD_phi = paths(6, 1:num_paths);
         x.DoD_theta = paths(7, 1:num_paths);
         x.LoS_status = paths(8, 1:num_paths);
-        % channel_params_all(user_count).Doppler_vel=channel_params.Doppler_vel(1:num_path_limited);
-        % channel_params_all(user_count).Doppler_acc=channel_params.Doppler_acc(1:num_path_limited);
+        if doppler_available
+            x.Doppler_vel = paths(9, 1:num_paths);
+            x.Doppler_acc = paths(10, 1:num_paths);
+        end
     else
         x.phase = [];
         x.ToA = [];
@@ -107,6 +137,10 @@ function x = parse_data(num_paths, paths, info, power_diff)
         x.DoD_phi = [];
         x.DoD_theta = [];
         x.LoS_status = [];
+        if doppler_available
+            x.Doppler_vel = [];
+            x.Doppler_acc = [];
+        end
     end
 
     %add_info = data.rx_locs(ue_idx_file, :);

@@ -160,7 +160,34 @@ function [params_inner] = validateAntennaParameters(params, params_inner)
     params_inner = checkAntennaSize(params, params_inner);
     params_inner = checkAntennaOrientation(params, params_inner);
     params_inner = checkAntennaSpacing(params, params_inner);
+    params_inner = checkAntennaFoV(params, params_inner);
     
+end
+
+function params_inner = checkAntennaFoV(params, params_inner)
+    % Check UE antenna FoV
+    UE_FoV_size = size(params.FoV_ant_UE);
+    assert(UE_FoV_size(2) == 2, 'The user antenna FoV parameter must be 2 dimensional [horizontal, vertical]');
+    assert(params.FoV_ant_UE(1) > 0 & params.FoV_ant_UE(1) <= 360, 'The horizontal FoV of the user antenna must be in (0, 360]');
+    assert(params.FoV_ant_UE(2) > 0 & params.FoV_ant_UE(2) <= 180, 'The vertical FoV of the user antenna must be in (0, 180]');
+    params_inner.ant_FoV_UE = params.FoV_ant_UE;
+    
+    % Check BS antenna size
+    BS_FoV_size = size(params.FoV_ant_BS);
+    assert(BS_FoV_size(2) == 2, 'The BS antenna FoV parameter must have 2 columns in the form of [horizontal, vertical]');
+    assert(all(params.FoV_ant_BS(:, 1) > 0 & params.FoV_ant_BS(:, 1) <= 360), 'The horizontal FoVs of the BS antennas must be in (0, 360]');
+    assert(all(params.FoV_ant_BS(:, 2) > 0 & params.FoV_ant_BS(:, 2) <= 180), 'The vertical FoVs of the BS antennas must be in (0, 180]');
+    
+    
+    if BS_FoV_size(1) ~= params.num_active_BS
+        if BS_FoV_size(1) == 1
+            params_inner.ant_FoV_BS = repmat(params.FoV_ant_BS, params.num_active_BS, 1);
+        else
+            error('The defined BS antenna panel FoV must be either 1x2 or Nx2 dimensional, where N is the number of active BSs.')
+        end
+    else
+        params_inner.ant_FoV_BS = params.FoV_ant_BS;
+    end
 end
 
 function params_inner = checkAntennaSize(params, params_inner)
