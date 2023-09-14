@@ -112,6 +112,12 @@ function [channel, channel_LoS_status, path_params] = construct_DeepMIMO_channel
     %Assuming the pulse shaping as a dirac delta function and no receive LPF
     if ~params.activate_RX_filter
         path_const=sqrt(power/params.num_OFDM).*exp(1j*path_params.phase*deg_to_rad).*exp(-1j*2*pi*(k/params.num_OFDM)*delay_normalized);
+        if params.enable_Doppler
+            delay = delay_normalized.*Ts;
+            Doppler_phase = exp(-1j*2*pi*params.carrier_freq*( ((path_params.Doppler_vel.*delay)./physconst('LightSpeed')) + ((path_params.Doppler_acc.*(delay.^2))./(2*physconst('LightSpeed'))) ));
+            path_const = path_const .* Doppler_phase;
+        end
+        
         channel = sum(reshape(array_response_RX, M_RX, 1, 1, []) .* reshape(array_response_TX, 1, M_TX, 1, []) .* reshape(path_const, 1, 1, num_sampled_subcarriers, []), 4);
     else
 
