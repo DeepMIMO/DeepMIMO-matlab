@@ -69,4 +69,4 @@ params.num_OFDM = 512;                % Number of OFDM subcarriers
 params.OFDM_sampling = [1];           % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
 
 params.enable_Doppler = 0;            % Enable Doppler shift (if available in the scenario)
-params.dual_polar = 0;                % Enable cross dual-polar antenna (if available in the scenario)
+params.dual_polar = 1;                % Enable cross dual-polar antenna (if available in the scenario)
