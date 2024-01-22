@@ -9,7 +9,7 @@ function [channel, channel_LoS_status, path_params] = construct_DeepMIMO_channel
 
     BW = params.bandwidth*1e9;
     deg_to_rad = pi/180;
-    Ts=1/BW;
+    Ts=1/BW; 
     k=(params.OFDM_sampling-1).';
     num_sampled_subcarriers=length(k);
 

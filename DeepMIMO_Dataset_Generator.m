@@ -6,7 +6,10 @@ addpath(genpath('DeepMIMO_functions'))
 dataset_params = read_params('parameters.m');
 [DeepMIMO_dataset, dataset_params] = DeepMIMO_generator(dataset_params);
 
-plot_los_status(DeepMIMO_dataset{1}, 1);
+% To plot the LoS status of each user, provide the basestation data 
+% into plot_los_status function.
+plot_los_status(DeepMIMO_dataset{1}); % Plots the LoS for the first basestation
+
 % -------------------------- Output Examples -----------------------------%
 % DeepMIMO_dataset{i}.user{j}.channel % Channel between BS i - User j
 % %  (# of User antennas) x (# of BS antennas) x (# of OFDM subcarriers)

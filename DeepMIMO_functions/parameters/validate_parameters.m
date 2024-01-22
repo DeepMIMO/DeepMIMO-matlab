@@ -20,7 +20,7 @@ function [params, params_inner] = additionalParameters(params)
     % Add dataset path
     if ~isfield(params, 'dataset_folder')
         current_folder = mfilename('fullpath');
-        deepmimo_folder = fileparts(fileparts(current_folder));
+        deepmimo_folder = fileparts(fileparts(fileparts(current_folder)));
         params_inner.dataset_folder = fullfile(deepmimo_folder, '/Raytracing_scenarios/');
 
         % Create folders if not exists
@@ -47,7 +47,11 @@ function [params, params_inner] = additionalParameters(params)
 
     % Check data version and load parameters of the scenario
     params_inner.data_format_version = checkDataVersion(scenario_folder);
-    version_postfix = strcat('v', num2str(params_inner.data_format_version));
+    version = params_inner.data_format_version;
+    if version == 2
+        version = 3;
+    end
+    version_postfix = strcat('v', num2str(version));
     
     % Load Scenario Parameters (version specific)
     load_scenario_params_fun = strcat('load_scenario_params_', version_postfix);
@@ -73,9 +77,9 @@ function version = checkDataVersion(scenario_folder)
     end
 end
 
-function [params, params_inner] = load_scenario_params_v2(params, params_inner)
+function [params, params_inner] = load_scenario_params_v3(params, params_inner)
   
-    if params_inner.dynamic_scenario == 1 % TO BE UPDATED for new format
+    if params_inner.dynamic_scenario == 1 
         list_of_folders = strsplit(sprintf('scene_%i--', params.scene_first-1:params.scene_last-1),'--');
         list_of_folders(end) = [];
         list_of_folders = fullfile(params_inner.dataset_folder, params.scenario, list_of_folders);
@@ -94,6 +98,15 @@ function [params, params_inner] = load_scenario_params_v2(params, params_inner)
     params.transmit_power_raytracing = transmit_power; % in dB
     params.user_grids = user_grids;
     params.num_BS = num_BS;
+    if params.enable_Doppler && ~doppler_available
+        params.enable_Doppler = 0;
+        warning('There is no Doppler data in this scenario (it is not dynamic). The parameter enable_Doppler is set to 0.')
+    end
+    
+    if params.dual_polar && ~dual_polar_available
+        params.dual_polar = 0;
+        warning('There is no dual-polar data in this scenario. The parameter dual_polar is set to 0.')
+    end
     %params.BS_grids = BS_grids;
     %params.BS_ID_map = TX_ID_map; % New addition for the new data format
     
@@ -156,7 +169,7 @@ function [params] = compareWithDefaultParameters(params)
 end
 
 function [params_inner] = validateAntennaParameters(params, params_inner)
-    
+    assert(max(params.active_BS) <= params.num_BS, ['There are only ' num2str(params.num_BS) ' basestation in this scenario! Please set active_BS parameter in this range.'])
     params_inner = checkAntennaSize(params, params_inner);
     params_inner = checkAntennaOrientation(params, params_inner);
     params_inner = checkAntennaSpacing(params, params_inner);
@@ -294,9 +307,11 @@ function params = validateChannelParameters(params)
 end
 
 function params_inner = addPolarizationList(params, params_inner)
-    if params.dual_polar & params_inner.dual_polar_available
-        params_inner.polarization_list = ["VV", "VH", "HV", "HH"];
+    if params.dual_polar && params_inner.dual_polar_available
+        params_inner.polarization_list = ["_VV", "_VH", "_HV", "_HH"];
+    elseif ~params.dual_polar && params_inner.dual_polar_available
+        params_inner.polarization_list = ["_VV"];
     else
-        params_inner.polarization_list = ["VV"];
+        params_inner.polarization_list = [""];
     end
 end

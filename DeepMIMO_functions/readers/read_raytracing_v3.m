@@ -5,14 +5,14 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(BS_ID, params, params_inner, channel_extension)
+function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(BS_ID, params, params_inner, channel_extension)
 
-    if params.dual_polar
-        data_key_name = strcat('channels_', channel_extension);
+    if params_inner.dual_polar_available
+        data_key_name = strcat('channels', channel_extension);
     else
         data_key_name = 'channels';
     end
-
+    
     num_paths = double(params.num_paths);
     tx_power_raytracing = params.transmit_power_raytracing;  % Current TX power in dBm
     transmit_power = 30; % Target TX power in dBm (1 Watt transmit power)
@@ -74,6 +74,9 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
 
             channel_params = data.(data_key_name){ue_idx_file}.p;
             add_info = data.rx_locs(ue_idx_file, :);
+            if isfield(data, 'tx_loc')
+                BS_loc = data.tx_loc;
+            end
             channel_params_all(user_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
             dc.add_ToA(channel_params_all(user_count).power, channel_params_all(user_count).ToA);
 
@@ -86,32 +89,36 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v2(B
     dc.reset()
 
     %% Loading channel parameters between current active basesation transmitter and all the active basestation receivers
-    user_count = 1;
+    bs_count = 1;
     filename = strcat('BS', num2str(BS_ID), '_BS.mat');
-    data = importdata(fullfile(params_inner.scenario_files, filename));
-    for bs_idx = params.active_BS
+    bs_filepath = fullfile(params_inner.scenario_files, filename);
+    if exist(bs_filepath, 'file')
+        data = importdata(bs_filepath);
+        for bs_idx = params.active_BS
 
-        max_paths = double(size(data.(data_key_name){bs_idx}.p, 2));
-        num_path_limited = double(min(num_paths, max_paths));
+            max_paths = double(size(data.(data_key_name){bs_idx}.p, 2));
+            num_path_limited = double(min(num_paths, max_paths));
 
-        channel_params = data.(data_key_name){bs_idx}.p;
-        add_info = data.rx_locs(bs_idx, :);
+            channel_params = data.(data_key_name){bs_idx}.p;
+            add_info = data.rx_locs(bs_idx, :);
 
-        if bs_idx == BS_ID
-            BS_loc = add_info(1:3);
+            if bs_idx == BS_ID
+                BS_loc = add_info(1:3);
+            end
+
+            channel_params_all_BS(bs_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
+            dc.add_ToA(channel_params_all_BS(bs_count).power, channel_params_all_BS(bs_count).ToA);
+
+            bs_count = bs_count + 1;
         end
 
-        channel_params_all_BS(user_count) = parse_data(params_inner.doppler_available, num_path_limited, channel_params, add_info, power_diff);
-        dc.add_ToA(channel_params_all_BS(user_count).power, channel_params_all_BS(user_count).ToA);
+        channel_params_BS = channel_params_all_BS(1,:);
 
-        user_count = user_count + 1;
+        dc.print_warnings('BS', BS_ID);
+        dc.reset()
+    else
+        channel_params_BS = [];
     end
-
-    channel_params_BS = channel_params_all_BS(1,:);
-    
-    dc.print_warnings('BS', BS_ID);
-    dc.reset()
-
 end
 
 function x = parse_data(doppler_available, num_paths, paths, info, power_diff)
@@ -125,8 +132,13 @@ function x = parse_data(doppler_available, num_paths, paths, info, power_diff)
         x.DoD_theta = paths(7, 1:num_paths);
         x.LoS_status = paths(8, 1:num_paths);
         if doppler_available
-            x.Doppler_vel = paths(9, 1:num_paths);
-            x.Doppler_acc = paths(10, 1:num_paths);
+            if size(paths, 1) > 8
+                x.Doppler_vel = paths(9, 1:num_paths);
+                x.Doppler_acc = paths(10, 1:num_paths);
+            else
+                x.Doppler_vel = zeros(size(x.DoD_phi));
+                x.Doppler_acc = zeros(size(x.DoD_phi));
+            end
         end
     else
         x.phase = [];

@@ -2,19 +2,18 @@
 % A detailed description of the parameters is available on DeepMIMO.net
 
 %Ray-tracing scenario
-params.dataset_folder = 'C:\Users\Umt\Desktop\dynamic_scenario';
-params.scenario = 'dyn3';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
+params.scenario = 'Indoor';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
 
 %Dynamic Scenario Scenes [only for dynamic (multiple-scene) scenarios]
-params.scene_first = 1000;
-params.scene_last = 1000;
+params.scene_first = 1;
+params.scene_last = 1;
 
 % Active base stations
 params.active_BS = [1, 2];             % Includes the numbers of the active BSs (values from 1-18 for 'O1')(check the scenario description at https://deepmimo.net/scenarios/ for the BS numbers) 
 
 % Active users
 params.active_user_first = 1;       % The first row of the considered user section (check the scenario description for the user row map)
-params.active_user_last = 1;        % The last row of the considered user section (check the scenario description for the user row map)
+params.active_user_last = 151;       % The last row of the considered user section (check the scenario description for the user row map)
 
 % Subsampling of active users
 %--> Setting both subsampling parameters to 1 activate all the users indicated previously
@@ -25,7 +24,7 @@ params.user_subsampling = 1;        % Randomly select round(user_subsampling*num
 params.num_ant_BS = [8, 1];      % Horizontal - Vertical
 params.num_ant_UE = [1, 1];      % Horizontal - Vertical
 
-params.FoV_ant_BS = [180, 180]; % Degrees in horizontal-vertical Max- 360 180
+params.FoV_ant_BS = [360, 180]; % Degrees in horizontal-vertical Max- 360 180
 params.FoV_ant_UE = [360, 180]; % Degrees in horizontal-vertical
 
 % Antenna array orientations
@@ -54,7 +53,6 @@ params.ant_spacing_UE = .5;           % ratio of the wavelength; for half wavele
 params.radiation_pattern = 0;         % 0: Isotropic and 
                                       % 1: Half-wave dipole
                  
-params.dual_polar = 0;
 
 % System parameters
 params.bandwidth = 0.05;              % The bandwidth in GHz
@@ -68,6 +66,7 @@ params.num_paths = 25;                 % Maximum number of paths to be considere
 
 % OFDM parameters
 params.num_OFDM = 512;                % Number of OFDM subcarriers
-params.OFDM_sampling = [1];         % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
+params.OFDM_sampling = [1];           % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
 
-params.enable_Doppler = 1;            % Enable Doppler shift (if available in the scenario)
+params.enable_Doppler = 0;            % Enable Doppler shift (if available in the scenario)
+params.dual_polar = 0;                % Enable cross dual-polar antenna (if available in the scenario)

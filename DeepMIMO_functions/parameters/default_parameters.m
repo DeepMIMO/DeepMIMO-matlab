@@ -32,7 +32,7 @@ params.num_ant_BS = [1, 8, 4];      % Number of antenna elements for the BS arra
 params.num_ant_UE = [1, 4, 2];      % Number of antenna elements for the user arrays in the x,y,z-axes
 
 params.FoV_ant_BS = [180, 180]; % Degrees in horizontal-vertical
-params.FoV_ant_UE = [360, 360]; % Degrees in horizontal-vertical
+params.FoV_ant_UE = [360, 180]; % Degrees in horizontal-vertical
 
 % Antenna array orientations
 params.array_rotation_BS = [5, 10, 20];         
@@ -64,7 +64,6 @@ params.bandwidth = 0.05;              % The bandwidth in GHz
 params.activate_RX_filter = 0;        % 0 No RX filter 
                                       % 1 Apply RX low-pass filter (ideal: Sinc in the time domain)
 
-params.dual_polar = 1;
 
 % Channel parameters # Activate OFDM
 params.generate_OFDM_channels = 1;    % 1: activate frequency domain (FD) channel generation for OFDM systems
@@ -75,6 +74,5 @@ params.num_paths = 5;                 % Maximum number of paths to be considered
 params.num_OFDM = 512;                % Number of OFDM subcarriers
 params.OFDM_sampling = [2:3];         % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
 
+params.dual_polar = 0;
 params.enable_Doppler = 0; 						% Enable Doppler shift (if available in the scenario)
-
-params.saveDataset = 0;               % 0: Will return the dataset without saving it (highly recommended!) 
