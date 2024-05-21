@@ -2,33 +2,34 @@
 % A detailed description of the parameters is available on DeepMIMO.net
 
 %Ray-tracing scenario
-params.scenario = 'O1_60';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
+params.scenario = 'Boston5G_28_RIS';          % The adopted ray tracing scenario [check the available scenarios at https://deepmimo.net/scenarios/]
 
 %Dynamic Scenario Scenes [only for dynamic (multiple-scene) scenarios]
 params.scene_first = 1;
 params.scene_last = 1;
 
+
 % Active base stations
-params.active_BS = [1];             % Includes the numbers of the active BSs (values from 1-18 for 'O1')(check the scenario description at https://deepmimo.net/scenarios/ for the BS numbers) 
+params.active_BS = [1, 2];             % Includes the numbers of the active BSs (values from 1-18 for 'O1')(check the scenario description at https://deepmimo.net/scenarios/ for the BS numbers) 
 
 % Active users
 params.active_user_first = 1;       % The first row of the considered user section (check the scenario description for the user row map)
-params.active_user_last = 44;       % The last row of the considered user section (check the scenario description for the user row map)
+params.active_user_last = 1622;       % The last row of the considered user section (check the scenario description for the user row map)
 
 % Subsampling of active users
 %--> Setting both subsampling parameters to 1 activate all the users indicated previously
 params.row_subsampling = 1;         % Randomly select round(row_subsampling*(active_user_last-params.active_user_first)) rows
-params.user_subsampling = 1;        % Randomly select round(user_subsampling*number_of_users_in_row) users in each row
+params.user_subsampling = 0.05;        % Randomly select round(user_subsampling*number_of_users_in_row) users in each row
 
 % Antenna array dimensions
-params.num_ant_BS = [8, 1];      % Horizontal - Vertical
+params.num_ant_BS = [16, 1];      % Horizontal - Vertical
 params.num_ant_UE = [1, 1];      % Horizontal - Vertical
 
-params.FoV_ant_BS = [180, 180]; % Degrees in horizontal-vertical Max- 360 180
+params.FoV_ant_BS = [360, 180]; % Degrees in horizontal-vertical Max- 360 180
 params.FoV_ant_UE = [360, 180]; % Degrees in horizontal-vertical
 
 % Antenna array orientations
-params.array_rotation_BS = [0, -45, 0];         
+params.array_rotation_BS = [0, 0, -90];         
 params.array_rotation_UE = [0, 0, 0];    
 % 3D rotation angles in degrees around the x,y,z axes respectively
 % The rotations around x,y,z are also called as slant, downtilt, and bearing angles (of an antenna towards +x)
@@ -56,7 +57,7 @@ params.radiation_pattern = 0;         % 0: Isotropic and
 
 % System parameters
 params.bandwidth = 0.05;              % The bandwidth in GHz
-params.activate_RX_filter = 1;        % 0 No RX filter 
+params.activate_RX_filter = 0;        % 0 No RX filter 
                                       % 1 Apply RX low-pass filter (ideal: Sinc in the time domain)
 
 % Channel parameters # Activate OFDM
@@ -66,7 +67,7 @@ params.num_paths = 25;                 % Maximum number of paths to be considere
 
 % OFDM parameters
 params.num_OFDM = 512;                % Number of OFDM subcarriers
-params.OFDM_sampling = [1];           % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
+params.OFDM_sampling = [1:8:512];     % The constructed channels will be calculated only at the sampled subcarriers (to reduce the size of the dataset)
 
 params.enable_Doppler = 0;            % Enable Doppler shift (if available in the scenario)
 params.dual_polar = 0;                % Enable cross dual-polar antenna (if available in the scenario)

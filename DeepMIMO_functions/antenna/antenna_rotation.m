@@ -5,19 +5,19 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [DoD_theta_LCS, DoD_phi_LCS, DoA_theta_LCS, DoA_phi_LCS] = axes_rotation(TX_rot, DoD_theta_GCS, DoD_phi_GCS, RX_rot, DoA_theta_GCS, DoA_phi_GCS)
-    %AXES ROTATION EFFECT on the DoDs and the DOAs
+function [DoD_theta_LCS, DoD_phi_LCS, DoA_theta_LCS, DoA_phi_LCS] = antenna_rotation(TX_rot, DoD_theta_GCS, DoD_phi_GCS, RX_rot, DoA_theta_GCS, DoA_phi_GCS)
+    %AXES ROTATION EFFECT on the DoDs and the DOA
 
     % Arbitrary 3D axes rotation from the "global coordinate system" (x,y,z) of the
     % chose scenario to the "the local coordinate systems" (x',y',z') relative
     % to the new panel orientation
 
-    [DoD_theta_LCS,DoD_phi_LCS]= angle_transformation(TX_rot,DoD_theta_GCS,DoD_phi_GCS);
-    [DoA_theta_LCS,DoA_phi_LCS]= angle_transformation(RX_rot,DoA_theta_GCS,DoA_phi_GCS);
+    [DoD_theta_LCS,DoD_phi_LCS]= rotateAngles(TX_rot, DoD_theta_GCS, DoD_phi_GCS);
+    [DoA_theta_LCS,DoA_phi_LCS]= rotateAngles(RX_rot, DoA_theta_GCS, DoA_phi_GCS);
 end
 
 
-function [Theta2, Phi2] = angle_transformation(Rot, Theta, Phi)
+function [Theta2, Phi2] = rotateAngles(Rot, Theta, Phi)
 
     % Phi = wrapTo360(Phi);
     Alpha = Rot(3);

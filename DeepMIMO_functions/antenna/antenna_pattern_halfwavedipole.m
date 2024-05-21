@@ -5,7 +5,7 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function Directivity = antenna_pattern_halfwavedipole(Theta,Phi)
+function Directivity = antenna_pattern_halfwavedipole(Theta, Phi)
     %RADIATION PATTERN EFFECT on the receive power calculation
     % Calculate Half-wave dipole directivity in a given direction
     % It is an omni directional radiation pattern 
