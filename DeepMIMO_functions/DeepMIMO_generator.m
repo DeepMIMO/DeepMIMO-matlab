@@ -16,6 +16,7 @@ function [DeepMIMO_dataset, params] = DeepMIMO_generator(params)
         for f = 1:length(params_inner.list_of_folders)
             fprintf('\nGenerating Scene %i/%i', f, length(params_inner.list_of_folders))
             params.scenario_files = params_inner.list_of_folders{f}; % The initial of all the scenario files
+            params_inner.scenario_files = params_inner.list_of_folders{f}; % The initial of all the scenario files
             DeepMIMO_scene{f} = generate_data(params, params_inner);
             param{f} = params;
         end
