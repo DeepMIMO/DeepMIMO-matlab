@@ -110,7 +110,10 @@ function [params, params_inner] = load_scenario_params_v3(params, params_inner)
     %params.BS_grids = BS_grids;
     %params.BS_ID_map = TX_ID_map; % New addition for the new data format
     
-    params_inner = findUserFileSplit(params_inner);
+    params_inner.scene = 1; % For static scenarios, to be updated outside for dynamic
+    for i=1:length(params_inner.list_of_folders)
+        params_inner.UE_file_split{i} = findUserFileSplit(params_inner.list_of_folders{i});
+    end
     params_inner.doppler_available = doppler_available;
     params_inner.dual_polar_available = dual_polar_available;
     
@@ -266,9 +269,9 @@ end
 
 % Find how the user files are split to multiple files with subset of users
 % E.g., 0-10k 10k-20k ... etc
-function params_inner = findUserFileSplit(params_inner)
+function UE_file_split = findUserFileSplit(data_folder)
     % Get a list of UE split
-    fileList = dir(fullfile(params_inner.scenario_files, '*.mat'));
+    fileList = dir(fullfile(data_folder, '*.mat'));
     filePattern = 'BS1_UE_(\d+)-(\d+)\.mat';
 
     number1 = [];
@@ -287,7 +290,7 @@ function params_inner = findUserFileSplit(params_inner)
             number2 = [number2 str2double(match{1}{2})];
         end
     end
-    params_inner.UE_file_split = [number1; number2];
+    UE_file_split = [number1; number2];
 end
 
 function [] = validateUserParameters(params)

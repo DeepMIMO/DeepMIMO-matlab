@@ -27,16 +27,19 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(B
     end
     dc = duration_check(params.symbol_duration);
 
+    scenario_folder = params_inner.list_of_folders{params_inner.scene};
+    UE_files = params_inner.UE_file_split{params_inner.scene};
+    
     file_idx = 1;
     file_loaded = 0;
     user_count = 1;
         
     if params_inner.dynamic_scenario
-        if ~isempty(params_inner.UE_file_split)
-            params.num_user = params_inner.UE_file_split(2, file_idx);
-            filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(params_inner.UE_file_split(1, file_idx)), '-', num2str(params_inner.UE_file_split(2, file_idx)), '.mat');
-            data = importdata(fullfile(params_inner.scenario_files, filename));
-            user_start = params_inner.UE_file_split(1, file_idx);
+        if ~isempty(UE_files)
+            params.num_user = UE_files(2, file_idx);
+            filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(UE_files(1, file_idx)), '-', num2str(UE_files(2, file_idx)), '.mat');
+            data = importdata(fullfile(scenario_folder, filename));
+            user_start = UE_files(1, file_idx);
             
             for ue_idx = 1:params.num_user
                 ue_idx_file = ue_idx - user_start;
@@ -57,14 +60,14 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(B
         for ue_idx = params.user_ids
             % If currently not loaded
             % load the file that user is contained
-            while ue_idx > params_inner.UE_file_split(2, file_idx)
+            while ue_idx > UE_files(2, file_idx)
                 file_idx = file_idx + 1;
                 file_loaded = 0;
             end
             if ~file_loaded
-                filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(params_inner.UE_file_split(1, file_idx)), '-', num2str(params_inner.UE_file_split(2, file_idx)), '.mat');
-                data = importdata(fullfile(params_inner.scenario_files, filename));
-                user_start = params_inner.UE_file_split(1, file_idx);
+                filename = strcat('BS', num2str(BS_ID), '_UE_', num2str(UE_files(1, file_idx)), '-', num2str(UE_files(2, file_idx)), '.mat');
+                data = importdata(fullfile(scenario_folder, filename));
+                user_start = UE_files(1, file_idx);
                 file_loaded = 1;
             end
 
@@ -91,7 +94,7 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(B
     %% Loading channel parameters between current active basesation transmitter and all the active basestation receivers
     bs_count = 1;
     filename = strcat('BS', num2str(BS_ID), '_BS.mat');
-    bs_filepath = fullfile(params_inner.scenario_files, filename);
+    bs_filepath = fullfile(scenario_folder, filename);
     if exist(bs_filepath, 'file')
         data = importdata(bs_filepath);
         for bs_idx = params.active_BS
