@@ -53,8 +53,10 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(B
                 
                 user_count = user_count + 1;
             end
+            channel_params_user = channel_params_all(1,:);
         else
             params.num_user = 0;
+            channel_params_user = [];
         end
     else
         for ue_idx = params.user_ids
@@ -85,8 +87,8 @@ function [channel_params_user, channel_params_BS, BS_loc] = read_raytracing_v3(B
 
             user_count = user_count + 1;
         end
+        channel_params_user = channel_params_all(1,:);
     end
-    channel_params_user = channel_params_all(1,:);
     
     dc.print_warnings('BS', BS_ID);
     dc.reset()
