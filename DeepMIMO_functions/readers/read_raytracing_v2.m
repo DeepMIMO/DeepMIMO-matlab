@@ -5,7 +5,7 @@
 % providing a benchmarking tool for the developed algorithms
 % ---------------------------------------------------------------------- %
 
-function [channel_params,channel_params_BS,BS_loc]=read_raytracing_v1(BS_ID, params, params_inner)
+function [channel_params,channel_params_BS,BS_loc] = read_raytracing_v2(BS_ID, params, params_inner)
 
 scenario_files = params_inner.scenario_files;
 %% Loading channel parameters between current active basesation transmitter and user receivers
@@ -46,7 +46,7 @@ user_count = 1;
 [~,user_order] = sort(user_ids);
 for Receiver_Number=1:user_last
     max_paths=double(DoD_array(pointer+2));
-    num_path_limited=double(min(num_paths,max_paths));
+    num_path_limited=double(min(num_paths, max_paths));
     if ismember(Receiver_Number, user_ids)
         if (max_paths>0)
             Relevant_data_length=max_paths*4;
@@ -67,7 +67,9 @@ for Receiver_Number=1:user_last
             channel_params_all(user_order(user_count)).loc=Loc_array(Receiver_Number,2:4);
             channel_params_all(user_order(user_count)).distance=PL_array(Receiver_Number,1);
             channel_params_all(user_order(user_count)).pathloss=PL_array(Receiver_Number,2);
-            channel_params_all(user_order(user_count)).LoS_status=LOS_array(Receiver_Number);
+            LoS_status = zeros(1, num_path_limited);
+            LoS_status(1) = LOS_array(Receiver_Number);
+            channel_params_all(user_order(user_count)).LoS_status=LoS_status;
             
             dc.add_ToA(channel_params_all(user_order(user_count)).power, channel_params_all(user_order(user_count)).ToA);
             
@@ -122,7 +124,7 @@ LOS_BSBS_array(1)=[];
 BS_count = 1;
 for Receiver_BS_Number=1:total_num_BSs
     max_paths_BSBS=double(DoD_BSBS_array(BS_pointer+2));
-    num_path_BS_limited=double(min(num_paths_BSBS,max_paths_BSBS));
+    num_path_BS_limited=double(min(num_paths_BSBS, max_paths_BSBS));
     if sum(Receiver_BS_Number == double(params.active_BS)) == 1 %Only read the channels related to the active basestation receivers
 
         if (max_paths_BSBS>0)
@@ -144,7 +146,9 @@ for Receiver_BS_Number=1:total_num_BSs
             channel_params_all_BS(BS_count).loc=Loc_BSBS_array(Receiver_BS_Number,2:4);
             channel_params_all_BS(BS_count).distance=PL_BSBS_array(Receiver_BS_Number,1);
             channel_params_all_BS(BS_count).pathloss=PL_BSBS_array(Receiver_BS_Number,2);
-            channel_params_all_BS(BS_count).LoS_status=LOS_BSBS_array(Receiver_BS_Number);
+            LoS_status = zeros(1, num_path_BS_limited);
+            LoS_status(1) = LOS_BSBS_array(Receiver_BS_Number);
+            channel_params_all_BS(BS_count).LoS_status=LoS_status;
 
             dc.add_ToA(channel_params_all_BS(BS_count).power, channel_params_all_BS(BS_count).ToA);
 

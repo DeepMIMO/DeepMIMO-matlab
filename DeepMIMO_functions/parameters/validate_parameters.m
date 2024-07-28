@@ -48,9 +48,6 @@ function [params, params_inner] = additionalParameters(params)
     % Check data version and load parameters of the scenario
     params_inner.data_format_version = checkDataVersion(scenario_folder);
     version = params_inner.data_format_version;
-    if version == 2
-        version = 3;
-    end
     version_postfix = strcat('v', num2str(version));
     
     % Load Scenario Parameters (version specific)
@@ -71,9 +68,10 @@ end
 function version = checkDataVersion(scenario_folder)
     new_params_file = fullfile(scenario_folder, 'params.mat');
     if exist(new_params_file, 'file') == 0
-        version = 1;
+        version = 2;
     else
         load(new_params_file)
+        version = 3;
     end
 end
 
@@ -119,7 +117,7 @@ function [params, params_inner] = load_scenario_params_v3(params, params_inner)
     
 end
 
-function [params, params_inner] = load_scenario_params_v1(params, params_inner)
+function [params, params_inner] = load_scenario_params_v2(params, params_inner)
   
     if params_inner.dynamic_scenario == 1
         list_of_folders = strsplit(sprintf('/scene_%i/--', params.scene_first-1:params.scene_last-1),'--');
@@ -142,6 +140,9 @@ function [params, params_inner] = load_scenario_params_v1(params, params_inner)
     load([params_inner.scenario_files, '.BSBS.params.mat']) % BS2BS parameter file
     params.BS_grids = BS_grids;
     
+    % v3 Parameters - all False
+    params_inner.doppler_available = 0;
+    params_inner.dual_polar_available = 0;
 end
 
 % Check the validity of the given parameters
